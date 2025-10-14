@@ -184,8 +184,6 @@ class CrimeCategoriesScreen extends StatelessWidget {
                                   MaterialPageRoute(
                                     builder: (_) => CrimeDetailScreen(
                                       crimeType: crime['title'] as String,
-                                      cityName:
-                                          'YourCityName', // Replace with actual city name variable if available
                                     ),
                                   ),
                                 );
