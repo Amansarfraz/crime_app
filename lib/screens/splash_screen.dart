@@ -66,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     width: 225,
                     fit: BoxFit.contain,
                   ),
-                  const SizedBox(height: 50),
+                  const SizedBox(height: 40),
 
                   // 🔷 App Name
                   Text(
@@ -78,7 +78,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 10),
 
                   // 🟣 Tagline
                   Text(
