@@ -13,38 +13,48 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _controller = TextEditingController();
   String? _crimeLevel;
-  List<Map<String, String>> recentSearches = [];
+
+  List<Map<String, String>> recentSearches = [
+    {'city': 'Karachi', 'level': 'High'},
+    {'city': 'Lahore', 'level': 'Medium'},
+    {'city': 'Islamabad', 'level': 'Low'},
+  ];
 
   Future<void> fetchCrimeRate(String city) async {
     if (city.isEmpty) return;
 
     final url = Uri.parse('https://api.api-ninjas.com/v1/crime?city=$city');
-    const apiKey = 'YOUR_API_KEY'; // 🔹 Replace with your free API key
+    const apiKey = 'YOUR_API_KEY'; // Replace with real key
 
-    final response = await http.get(url, headers: {'X-Api-Key': apiKey});
+    try {
+      final response = await http.get(url, headers: {'X-Api-Key': apiKey});
+      if (response.statusCode == 200 && response.body.isNotEmpty) {
+        final data = jsonDecode(response.body);
+        if (data is List && data.isNotEmpty) {
+          // use a safer field; if missing, assign random mock index
+          double index = (data[0]['crime_index'] ?? 5).toDouble();
+          String level = index > 7
+              ? 'High'
+              : index > 4
+              ? 'Medium'
+              : 'Low';
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-
-      // Mock logic: interpret crime level from API
-      double crimeIndex = (data[0]['crime_index'] ?? 0).toDouble();
-      String level = crimeIndex > 7
-          ? 'High'
-          : crimeIndex > 4
-          ? 'Medium'
-          : 'Low';
-
-      setState(() {
-        _crimeLevel = level;
-        recentSearches.insert(0, {'city': city, 'level': level});
-      });
-    } else {
-      // Fallback (mock)
-      setState(() {
-        _crimeLevel = 'Medium';
-        recentSearches.insert(0, {'city': city, 'level': 'Medium'});
-      });
+          setState(() {
+            _crimeLevel = level;
+            recentSearches.insert(0, {'city': city, 'level': level});
+          });
+          return;
+        }
+      }
+    } catch (e) {
+      debugPrint('API error: $e');
     }
+
+    // fallback mock
+    setState(() {
+      _crimeLevel = 'Medium';
+      recentSearches.insert(0, {'city': city, 'level': 'Medium'});
+    });
   }
 
   Color getLevelColor(String level) {
@@ -70,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🔷 Top Bar
+              // 🔷 Header
               Container(
                 height: 80,
                 width: double.infinity,
@@ -108,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 20),
 
-              // 🔍 Search Bar
+              // 🔍 Search
               Row(
                 children: [
                   Expanded(
@@ -116,7 +126,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: 50,
                       decoration: BoxDecoration(
                         color: const Color(0xFFE9E7E7),
-                        border: Border.all(color: const Color(0xFFE9E7E7)),
                         borderRadius: BorderRadius.circular(5),
                       ),
                       child: Row(
@@ -166,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 40),
 
-              // Display crime level if available
+              // 🔸 Show crime level
               if (_crimeLevel != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
@@ -175,7 +184,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         "Crime Level: ",
                         style: GoogleFonts.poppins(
-                          color: Colors.black,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
@@ -214,17 +222,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-              // ⚡ Quick Access
+              // 🧭 Quick Access
               Text(
                 "Quick Access",
                 style: GoogleFonts.poppins(
-                  color: Colors.black,
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
                 ),
               ),
               const SizedBox(height: 16),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -247,7 +253,6 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 "Recent Searches",
                 style: GoogleFonts.poppins(
-                  color: Colors.black,
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
                 ),
@@ -261,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         padding: const EdgeInsets.only(bottom: 8),
                         child: buildSearchTile(
                           item['city']!,
-                          item['level'] ?? 'Medium',
+                          item['level'] ?? '',
                         ),
                       ),
                     )
@@ -269,26 +274,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
 
               const SizedBox(height: 50),
-
-              // ⚪ Bottom Bar
-              Container(
-                height: 60,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: Colors.grey, width: 1),
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(10),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: const [
-                    Icon(Icons.home, color: Color(0xFF2209B4)),
-                    Icon(Icons.notifications_none, color: Colors.grey),
-                  ],
-                ),
-              ),
             ],
           ),
         ),
@@ -296,7 +281,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 🔹 Quick Access Button
   Widget buildQuickBox(String title, IconData icon) {
     return Container(
       height: 100,
@@ -325,10 +309,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 🔹 Recent Search Tile
   Widget buildSearchTile(String city, String level) {
     Color levelColor = getLevelColor(level);
-
     return Container(
       height: 50,
       decoration: BoxDecoration(
