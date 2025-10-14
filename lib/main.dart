@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'screens/splash_screen.dart'; // ✅ Fixed file name (no space)
+import 'screens/splash_screen.dart';
+import 'screens/get_started_screen.dart'; // ✅ Fixed file name (no space)
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +16,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false, // optional
       theme: ThemeData(fontFamily: 'Poppins', primarySwatch: Colors.brown),
       initialRoute: '/',
-      routes: {'/': (context) => const SplashScreen()},
+      routes: {
+        '/': (context) => const SplashScreen(),
+        '/getstartedscreen': (context) => const GetStartedScreen(),
+      },
     );
   }
 }
