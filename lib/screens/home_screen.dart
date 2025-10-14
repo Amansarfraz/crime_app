@@ -15,14 +15,13 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _crimeLevel;
   List<Map<String, String>> recentSearches = [];
 
-  // ✅ Fetch from real hosted JSON API (Pakistan data)
   Future<void> fetchCrimeRate(String city) async {
     if (city.isEmpty) return;
 
     final normalizedCity = city.trim().toLowerCase();
 
     const pakistanApi =
-        'https://api.jsonbin.io/v3/b/6718f0e2e41b4d34e4c9f82a/latest'; // free hosted live data
+        'https://api.jsonbin.io/v3/b/6718f0e2e41b4d34e4c9f82a/latest';
 
     try {
       final response = await http.get(Uri.parse(pakistanApi));
@@ -45,7 +44,6 @@ class _HomeScreenState extends State<HomeScreen> {
       debugPrint('Pakistan API error: $e');
     }
 
-    // 🌍 Fallback for other countries (estimated logic)
     String level;
     if (normalizedCity.contains('new york') ||
         normalizedCity.contains('mexico') ||
@@ -83,7 +81,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // bottom navigation bar
       bottomNavigationBar: Container(
         height: 60,
         decoration: const BoxDecoration(
@@ -113,30 +110,46 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🌟 Top Blue Bar
+              // 🌟 Top Blue Bar with Bell Icon
               Container(
                 width: double.infinity,
                 height: 80,
                 color: const Color(0xFF2209B4),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const SizedBox(width: 16),
-                    Container(
-                      height: 40,
-                      width: 40,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.shield, color: Color(0xFF2209B4)),
+                    Row(
+                      children: [
+                        const SizedBox(width: 16),
+                        Container(
+                          height: 40,
+                          width: 40,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.shield,
+                            color: Color(0xFF2209B4),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          "Crime Rate Alert",
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 10),
-                    Text(
-                      "Crime Rate Alert",
-                      style: GoogleFonts.poppins(
+                    const Padding(
+                      padding: EdgeInsets.only(right: 16),
+                      child: Icon(
+                        Icons.notifications_none,
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
+                        size: 28,
                       ),
                     ),
                   ],
@@ -260,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 20),
 
-              // ⚡ Quick Access Buttons
+              // ⚡ Quick Access
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
