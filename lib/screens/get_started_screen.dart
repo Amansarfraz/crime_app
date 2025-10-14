@@ -1,3 +1,4 @@
+import 'package:crime_app/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
@@ -100,7 +101,12 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
                     height: 60,
                     child: ElevatedButton(
                       onPressed: () {
-                        // 👉 Add your navigation here
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HomeScreen(),
+                          ),
+                        ); // 👉 Add your navigation here
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white.withOpacity(0.8),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
-import 'screens/get_started_screen.dart'; // ✅ Fixed file name (no space)
+import 'screens/get_started_screen.dart';
+import 'screens/home_screen.dart'; // ✅ Fixed file name (no space)
 
 void main() {
   runApp(const MyApp());
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/getstartedscreen': (context) => const GetStartedScreen(),
+        '/home_screen': (context) => const HomeScreen(),
       },
     );
   }
