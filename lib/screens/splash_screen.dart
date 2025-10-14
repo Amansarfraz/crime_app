@@ -52,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(
-              height: 60,
+              height: 80,
             ), // 🟣 Added space to push image a bit down
             // 🔰 App Icon
             Image.asset(
@@ -62,7 +62,7 @@ class _SplashScreenState extends State<SplashScreen> {
               fit: BoxFit.contain,
             ),
 
-            const SizedBox(height: 50), // increased gap below image
+            const SizedBox(height: 60), // increased gap below image
             // 🔷 App Name
             Text(
               "Crime Rate Alert",
@@ -73,7 +73,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
 
-            const SizedBox(height: 15),
+            const SizedBox(height: 20),
 
             // 🟣 Tagline
             Text(
@@ -86,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
 
-            const SizedBox(height: 60), // decreased from 80 to move dots up
+            const SizedBox(height: 120), // decreased from 80 to move dots up
             // ⚪ Dots Indicator (slightly moved upward)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -120,7 +120,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ],
             ),
 
-            const SizedBox(height: 160), // moved version a bit closer
+            const SizedBox(height: 190), // moved version a bit closer
             // 🔹 Version text
             Text(
               "Version 1.0.0",
