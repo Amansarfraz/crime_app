@@ -52,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(
-              height: 80,
+              height: 120,
             ), // 🟣 Added space to push image a bit down
             // 🔰 App Icon
             Image.asset(
@@ -73,7 +73,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 15),
 
             // 🟣 Tagline
             Text(
@@ -86,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
 
-            const SizedBox(height: 120), // decreased from 80 to move dots up
+            const SizedBox(height: 260), // decreased from 80 to move dots up
             // ⚪ Dots Indicator (slightly moved upward)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -125,7 +125,7 @@ class _SplashScreenState extends State<SplashScreen> {
             Text(
               "Version 1.0.0",
               style: GoogleFonts.poppins(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withOpacity(2.0),
                 fontSize: 10,
                 fontWeight: FontWeight.w400,
               ),
