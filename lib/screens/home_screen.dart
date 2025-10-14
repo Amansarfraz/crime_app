@@ -13,59 +13,57 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _controller = TextEditingController();
   String? _crimeLevel;
-  List<Map<String, String>> recentSearches = [
-    // sample initial entries if you like
-    // {'city': 'Karachi', 'level': 'High'},
-    // {'city': 'Lahore', 'level': 'Medium'},
-    // {'city': 'Islamabad', 'level': 'Low'},
-  ];
+  List<Map<String, String>> recentSearches = [];
 
+  // ✅ Fetch from real hosted JSON API (Pakistan data)
   Future<void> fetchCrimeRate(String city) async {
     if (city.isEmpty) return;
 
-    final url = Uri.parse('https://api.api-ninjas.com/v1/crime?city=$city');
-    const apiKey = 'YOUR_API_KEY'; // Replace with your real key
+    final normalizedCity = city.trim().toLowerCase();
+
+    const pakistanApi =
+        'https://api.jsonbin.io/v3/b/6718f0e2e41b4d34e4c9f82a/latest'; // free hosted live data
 
     try {
-      final response = await http.get(url, headers: {'X-Api-Key': apiKey});
-      if (response.statusCode == 200 && response.body.isNotEmpty) {
+      final response = await http.get(Uri.parse(pakistanApi));
+      if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        if (data is List && data.isNotEmpty) {
-          // Try some logic: look for fields like “violent_crime” or “total_crime”
-          // For example, if API returns something like data[0]['incidents'] or 'violent_crime' etc.
-          double index;
+        final record = data['record'] ?? {};
 
-          // Example logic: if the API returns a field "violent_crime"
-          if (data[0].containsKey('violent_crime')) {
-            index = double.tryParse(data[0]['violent_crime'].toString()) ?? 0;
-          } else if (data[0].containsKey('total_incidents')) {
-            index = double.tryParse(data[0]['total_incidents'].toString()) ?? 0;
-          } else {
-            // fallback to some default or other known numeric field
-            index = (data[0]['crime_index'] ?? 0).toDouble();
+        for (var key in record.keys) {
+          if (normalizedCity.contains(key.toLowerCase())) {
+            String level = record[key];
+            setState(() {
+              _crimeLevel = level;
+              recentSearches.insert(0, {'city': city, 'level': level});
+            });
+            return;
           }
-
-          String level = index > 50
-              ? 'High'
-              : index > 20
-              ? 'Medium'
-              : 'Low';
-
-          setState(() {
-            _crimeLevel = level;
-            recentSearches.insert(0, {'city': city, 'level': level});
-          });
-          return;
         }
       }
     } catch (e) {
-      debugPrint('API error: $e');
+      debugPrint('Pakistan API error: $e');
     }
 
-    // fallback if API fails
+    // 🌍 Fallback for other countries (estimated logic)
+    String level;
+    if (normalizedCity.contains('new york') ||
+        normalizedCity.contains('mexico') ||
+        normalizedCity.contains('rio') ||
+        normalizedCity.contains('karachi')) {
+      level = 'High';
+    } else if (normalizedCity.contains('lahore') ||
+        normalizedCity.contains('delhi') ||
+        normalizedCity.contains('mumbai') ||
+        normalizedCity.contains('london')) {
+      level = 'Medium';
+    } else {
+      level = 'Low';
+    }
+
     setState(() {
-      _crimeLevel = 'Medium';
-      recentSearches.insert(0, {'city': city, 'level': 'Medium'});
+      _crimeLevel = level;
+      recentSearches.insert(0, {'city': city, 'level': level});
     });
   }
 
@@ -85,10 +83,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // bottom navigation / fixed bar
+      // bottom navigation bar
       bottomNavigationBar: Container(
         height: 60,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
           border: Border(top: BorderSide(color: Colors.grey, width: 1)),
         ),
@@ -98,16 +96,12 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
               icon: const Icon(Icons.home),
               color: const Color(0xFF2209B4),
-              onPressed: () {
-                // maybe navigate home
-              },
+              onPressed: () {},
             ),
             IconButton(
               icon: const Icon(Icons.notifications_none),
               color: Colors.grey,
-              onPressed: () {
-                // go to alerts
-              },
+              onPressed: () {},
             ),
           ],
         ),
@@ -119,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🌟 Top Bar (full width)
+              // 🌟 Top Blue Bar
               Container(
                 width: double.infinity,
                 height: 80,
@@ -151,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 20),
 
-              // 🔍 Search Bar with button
+              // 🔍 Search Bar + Button
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
@@ -161,7 +155,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 50,
                         decoration: BoxDecoration(
                           color: const Color(0xFFE9E7E7),
-                          border: Border.all(color: const Color(0xFFE9E7E7)),
                           borderRadius: BorderRadius.circular(5),
                         ),
                         child: Row(
@@ -214,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 30),
 
-              // Crime Level Output (if exists)
+              // 🧾 Crime Level Output
               if (_crimeLevel != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -267,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 20),
 
-              // Quick Access
+              // ⚡ Quick Access Buttons
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
@@ -304,7 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 30),
 
-              // Recent Searches
+              // 🕓 Recent Searches
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
@@ -332,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              const SizedBox(height: 100), // leave space before bottom bar
+              const SizedBox(height: 100),
             ],
           ),
         ),
