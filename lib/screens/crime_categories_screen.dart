@@ -182,9 +182,7 @@ class CrimeCategoriesScreen extends StatelessWidget {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => CrimeDetailScreen(
-                                      crimeType: crime['title'] as String,
-                                    ),
+                                    builder: (_) => CrimeDetailScreen(),
                                   ),
                                 );
                               },
