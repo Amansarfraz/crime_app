@@ -1,3 +1,4 @@
+import 'package:crime_app/screens/get_started_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
@@ -18,6 +19,7 @@ class CrimeRateApp extends StatelessWidget {
   }
 }
 
+// ---------------- Splash Screen ----------------
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -29,10 +31,13 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Navigate after 3 seconds
+
+    // ✅ Navigate to GetStartedScreen after 3 seconds
     Timer(const Duration(seconds: 3), () {
-      // Example navigation:
-      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomePage()));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const GetStartedScreen()),
+      );
     });
   }
 
@@ -41,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        height: double.infinity, // ✅ ensure full height
+        height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFF3B16BD), Color(0xFF1B0A57)],
@@ -50,14 +55,11 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
         ),
         child: SafeArea(
-          // ✅ prevent UI overflow on devices with bottom insets
           child: Column(
-            mainAxisAlignment:
-                MainAxisAlignment.spaceBetween, // ✅ auto adjust spacing
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const SizedBox(height: 80),
 
-              // 🔰 App Icon
               Column(
                 children: [
                   Image.asset(
@@ -68,7 +70,6 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                   const SizedBox(height: 40),
 
-                  // 🔷 App Name
                   Text(
                     "Crime Rate Alert",
                     style: GoogleFonts.poppins(
@@ -80,7 +81,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
                   const SizedBox(height: 10),
 
-                  // 🟣 Tagline
                   Text(
                     "Stay Safe with Real-time\nCrime Alerts",
                     textAlign: TextAlign.center,
@@ -93,7 +93,6 @@ class _SplashScreenState extends State<SplashScreen> {
                 ],
               ),
 
-              // ⚪ Dots Indicator
               Column(
                 children: [
                   Row(
@@ -128,8 +127,6 @@ class _SplashScreenState extends State<SplashScreen> {
                     ],
                   ),
                   const SizedBox(height: 30),
-
-                  // 🔹 Version text
                   Text(
                     "Version 1.0.0",
                     style: GoogleFonts.poppins(
