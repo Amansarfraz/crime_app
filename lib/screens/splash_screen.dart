@@ -125,7 +125,7 @@ class _SplashScreenState extends State<SplashScreen> {
             Text(
               "Version 1.0.0",
               style: GoogleFonts.poppins(
-                color: Colors.white.withOpacity(2.0),
+                color: Colors.white.withOpacity(0.9),
                 fontSize: 10,
                 fontWeight: FontWeight.w400,
               ),
