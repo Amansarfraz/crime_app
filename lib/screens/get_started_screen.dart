@@ -120,7 +120,7 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 50),
 
                   // 🔹 Version Text
                   Text(
