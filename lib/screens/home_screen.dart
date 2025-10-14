@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:crime_app/screens/crime_categories_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
@@ -93,12 +94,18 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
               icon: const Icon(Icons.home),
               color: const Color(0xFF2209B4),
-              onPressed: () {},
+              onPressed: () {
+                // 👉 Navigator lagana yahan (Home icon click par)
+                // Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+              },
             ),
             IconButton(
               icon: const Icon(Icons.notifications_none),
               color: Colors.grey,
-              onPressed: () {},
+              onPressed: () {
+                // 👉 Navigator lagana yahan (Bell icon click par)
+                // Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationsScreen()));
+              },
             ),
           ],
         ),
@@ -291,8 +298,28 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    buildQuickBox("Crime Categories", Icons.list),
-                    buildQuickBox("Alerts", Icons.warning_amber_rounded),
+                    GestureDetector(
+                      onTap: () {
+                        // 👉 Navigator lagana yahan (Crime Categories box par)
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CrimeCategoriesScreen(),
+                          ),
+                        );
+                      },
+                      child: buildQuickBox("Crime Categories", Icons.list),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        // 👉 Navigator lagana yahan (Alerts box par)
+                        // Navigator.push(context, MaterialPageRoute(builder: (context) => const AlertsScreen()));
+                      },
+                      child: buildQuickBox(
+                        "Alerts",
+                        Icons.warning_amber_rounded,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -302,8 +329,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    buildQuickBox("Safety Tips", Icons.verified_user),
-                    buildQuickBox("Settings", Icons.settings),
+                    GestureDetector(
+                      onTap: () {
+                        // 👉 Navigator lagana yahan (Safety Tips box par)
+                        // Navigator.push(context, MaterialPageRoute(builder: (context) => const SafetyTipsScreen()));
+                      },
+                      child: buildQuickBox("Safety Tips", Icons.verified_user),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        // 👉 Navigator lagana yahan (Settings box par)
+                        // Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()));
+                      },
+                      child: buildQuickBox("Settings", Icons.settings),
+                    ),
                   ],
                 ),
               ),
