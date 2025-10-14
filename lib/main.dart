@@ -23,7 +23,12 @@ class MyApp extends StatelessWidget {
         // ✅ Handles routes that need arguments
         if (settings.name == '/crime_detail_screen') {
           final crimeType = settings.arguments as String;
-          return MaterialPageRoute(builder: (_) => CrimeDetailScreen());
+          return MaterialPageRoute(
+            builder: (_) => CrimeDetailScreen(
+              crimeType: crimeType,
+              cityName: 'YourCityName',
+            ),
+          );
         }
         return null;
       },

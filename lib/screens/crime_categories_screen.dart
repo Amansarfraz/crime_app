@@ -62,7 +62,7 @@ class CrimeCategoriesScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // 🔷 Top Blue Bar
+          // Top Blue Bar
           Container(
             height: 80,
             width: double.infinity,
@@ -87,7 +87,6 @@ class CrimeCategoriesScreen extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          // 📜 Scrollable content
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -110,7 +109,7 @@ class CrimeCategoriesScreen extends StatelessWidget {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // 🟪 Left icon box
+                              // Left icon box
                               Container(
                                 margin: const EdgeInsets.all(16),
                                 width: 70,
@@ -132,12 +131,12 @@ class CrimeCategoriesScreen extends StatelessWidget {
                                 ),
                               ),
 
-                              // 📖 Text section
+                              // Text section
                               Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.only(
                                     top: 20,
-                                    right: 40, // space for arrow
+                                    right: 40,
                                   ),
                                   child: Column(
                                     crossAxisAlignment:
@@ -168,7 +167,7 @@ class CrimeCategoriesScreen extends StatelessWidget {
                             ],
                           ),
 
-                          // ➡️ Arrow button (bottom-right)
+                          // Arrow button (bottom-right) — opens dialog to ask city
                           Positioned(
                             right: 8,
                             bottom: 8,
@@ -178,13 +177,74 @@ class CrimeCategoriesScreen extends StatelessWidget {
                                 color: Colors.black,
                                 size: 18,
                               ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => CrimeDetailScreen(),
-                                  ),
+                              onPressed: () async {
+                                // Show dialog to get city name from user
+                                final city = await showDialog<String?>(
+                                  context: context,
+                                  builder: (context) {
+                                    final TextEditingController _cityCtrl =
+                                        TextEditingController();
+                                    return AlertDialog(
+                                      title: Text(
+                                        'Enter City Name',
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      content: TextField(
+                                        controller: _cityCtrl,
+                                        decoration: InputDecoration(
+                                          hintText: 'e.g. Karachi, Lahore',
+                                          hintStyle: GoogleFonts.poppins(
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, null),
+                                          child: Text(
+                                            'Cancel',
+                                            style: GoogleFonts.poppins(),
+                                          ),
+                                        ),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            final txt = _cityCtrl.text.trim();
+                                            if (txt.isEmpty) {
+                                              // don't close if empty
+                                              return;
+                                            }
+                                            Navigator.pop(context, txt);
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: const Color(
+                                              0xFF2209B4,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Go',
+                                            style: GoogleFonts.poppins(),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
                                 );
+
+                                if (city != null && city.isNotEmpty) {
+                                  // navigate and pass both crimeType and cityName
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => CrimeDetailScreen(
+                                        crimeType: crime['title'] as String,
+                                        cityName: city,
+                                      ),
+                                    ),
+                                  );
+                                }
                               },
                             ),
                           ),
