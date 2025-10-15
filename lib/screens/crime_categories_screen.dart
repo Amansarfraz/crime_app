@@ -1,56 +1,135 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'crime_detail_screen.dart';
 
 class CrimeCategoriesScreen extends StatelessWidget {
   const CrimeCategoriesScreen({super.key});
 
+  // embedded sample PK dataset (same style as HomeScreen)
+  static const Map<String, Map<String, dynamic>> pkCityStats = {
+    'lahore': {
+      'population': 11126285,
+      'theft': 1240,
+      'robbery': 540,
+      'cybercrime': 280,
+      'harassment': 90,
+      'assault': 620,
+      'vandalism': 180,
+      'fraud': 400,
+      'drugs': 310,
+    },
+    'karachi': {
+      'population': 14910352,
+      'theft': 3200,
+      'robbery': 1400,
+      'cybercrime': 720,
+      'harassment': 200,
+      'assault': 1100,
+      'vandalism': 420,
+      'fraud': 920,
+      'drugs': 680,
+    },
+    'islamabad': {
+      'population': 1095064,
+      'theft': 180,
+      'robbery': 60,
+      'cybercrime': 95,
+      'harassment': 25,
+      'assault': 140,
+      'vandalism': 30,
+      'fraud': 55,
+      'drugs': 40,
+    },
+    'rawalpindi': {
+      'population': 2098231,
+      'theft': 420,
+      'robbery': 150,
+      'cybercrime': 60,
+      'harassment': 35,
+      'assault': 220,
+      'vandalism': 68,
+      'fraud': 80,
+      'drugs': 90,
+    },
+  };
+
+  // Helper: return stats map for given city (fallback generator if not in pkCityStats)
+  Map<String, dynamic> _getStats(String city) {
+    final key = city.toLowerCase();
+    if (pkCityStats.containsKey(key)) {
+      return pkCityStats[key]!;
+    } else {
+      final seed = city.codeUnits.fold<int>(0, (p, e) => p + e);
+      return {
+        'population': 500000 + (seed % 500000),
+        'theft': 100 + (seed % 800),
+        'robbery': 30 + (seed % 400),
+        'cybercrime': 10 + (seed % 200),
+        'harassment': 5 + (seed % 120),
+        'assault': 40 + (seed % 600),
+        'vandalism': 10 + (seed % 150),
+        'fraud': 20 + (seed % 300),
+        'drugs': 10 + (seed % 250),
+      };
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // include 'key' for each crime so we can pass machine key to detail screen
     final List<Map<String, dynamic>> crimes = [
       {
         'title': 'Theft',
+        'key': 'theft',
         'desc':
-            "Unauthorized taking of someone else's property with intend to permanently deprive them of it.",
+            "Unauthorized taking of someone else's property with intent to permanently deprive them of it.",
         'icon': Icons.lock_open,
       },
       {
         'title': 'Robbery',
+        'key': 'robbery',
         'desc':
             "Taking property from a person using force, threat of force, or intimidation.",
         'icon': Icons.remove_red_eye,
       },
       {
         'title': 'Cybercrime',
+        'key': 'cybercrime',
         'desc':
             "Criminal activities carried out using computers, networks or digital devices.",
         'icon': Icons.computer,
       },
       {
         'title': 'Harassment',
+        'key': 'harassment',
         'desc':
             "Unwanted behavior that is intended to disturb or upset other person repeatedly.",
         'icon': Icons.warning_amber_rounded,
       },
       {
         'title': 'Assault',
+        'key': 'assault',
         'desc':
             "Intentional act that creates fear of imminent harmful or offensive contact.",
         'icon': Icons.gavel,
       },
       {
         'title': 'Vandalism',
+        'key': 'vandalism',
         'desc':
             "Deliberate destruction or damage to public or private property.",
         'icon': Icons.brush,
       },
       {
         'title': 'Fraud',
+        'key': 'fraud',
         'desc':
-            "Wrongful deception intented to result in financial or personal gain.",
+            "Wrongful deception intended to result in financial or personal gain.",
         'icon': Icons.credit_card,
       },
       {
         'title': 'Drug Offense',
+        'key': 'drugs',
         'desc':
             "Crimes related to illegal possession, distribution, or manufacturing of controlled substances.",
         'icon': Icons.medication_liquid,
@@ -166,7 +245,7 @@ class CrimeCategoriesScreen extends StatelessWidget {
                             ],
                           ),
 
-                          // Arrow button (bottom-right) — opens dialog to ask city
+                          // Arrow button (bottom-right) — opens dialog to ask city and then navigates
                           Positioned(
                             right: 8,
                             bottom: 8,
@@ -211,10 +290,8 @@ class CrimeCategoriesScreen extends StatelessWidget {
                                         ElevatedButton(
                                           onPressed: () {
                                             final txt = _cityCtrl.text.trim();
-                                            if (txt.isEmpty) {
-                                              // don't close if empty
-                                              return;
-                                            }
+                                            if (txt.isEmpty)
+                                              return; // don't close if empty
                                             Navigator.pop(context, txt);
                                           },
                                           style: ElevatedButton.styleFrom(
@@ -233,7 +310,23 @@ class CrimeCategoriesScreen extends StatelessWidget {
                                 );
 
                                 if (city != null && city.isNotEmpty) {
-                                  // navigate and pass both crimeType and cityName
+                                  // compute local stats for this city
+                                  final stats = _getStats(city);
+                                  final key = crime['key'] as String;
+                                  final localCount = (stats[key] ?? 0) as int;
+
+                                  // Navigate to CrimeDetailScreen and pass dynamic values
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => CrimeDetailScreen(
+                                        cityName: city,
+                                        crimeKey: key,
+                                        crimeTitle: crime['title'] as String,
+                                        localCount: localCount,
+                                      ),
+                                    ),
+                                  );
                                 }
                               },
                             ),

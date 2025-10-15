@@ -4,7 +4,6 @@ import 'screens/get_started_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/crime_categories_screen.dart';
 import 'screens/crime_detail_screen.dart';
-// ✅ Correct import
 
 void main() {
   runApp(const MyApp());
@@ -19,19 +18,32 @@ class MyApp extends StatelessWidget {
       title: 'Crime Rate Alert',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(fontFamily: 'Poppins', primarySwatch: Colors.brown),
+
+      // 🏁 First screen to show
       initialRoute: '/',
 
+      // ✅ Define only static screens here
       routes: {
         '/': (context) => const SplashScreen(),
         '/getstartedscreen': (context) => const GetStartedScreen(),
         '/home_screen': (context) => const HomeScreen(),
         '/crime_categories_screen': (context) => const CrimeCategoriesScreen(),
-        '/crime_detail_screen': (context) => const CrimeDetailScreen(
-          cityName: cityName,
-          crimeKey: crimeKey,
-          crimeTitle: crimeTitle,
-          localCount: localCount,
-        ),
+      },
+
+      // ✅ Handle dynamic routes like CrimeDetailScreen here
+      onGenerateRoute: (settings) {
+        if (settings.name == '/crime_detail_screen') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (_) => CrimeDetailScreen(
+              cityName: args['cityName'],
+              crimeTitle: args['crimeTitle'],
+              crimeKey: args['crimeKey'],
+              localCount: args['localCount'],
+            ),
+          );
+        }
+        return null;
       },
     );
   }
