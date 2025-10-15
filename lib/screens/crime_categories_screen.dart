@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'crime_detail_screen.dart';
 
 class CrimeCategoriesScreen extends StatelessWidget {
   const CrimeCategoriesScreen({super.key});
@@ -235,15 +234,6 @@ class CrimeCategoriesScreen extends StatelessWidget {
 
                                 if (city != null && city.isNotEmpty) {
                                   // navigate and pass both crimeType and cityName
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => CrimeDetailScreen(
-                                        crimeType: crime['title'] as String,
-                                        cityName: city,
-                                      ),
-                                    ),
-                                  );
                                 }
                               },
                             ),
