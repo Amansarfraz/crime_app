@@ -3,6 +3,7 @@ import 'screens/splash_screen.dart';
 import 'screens/get_started_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/crime_categories_screen.dart';
+import 'screens/crime_detail_screen.dart';
 // ✅ Correct import
 
 void main() {
@@ -25,6 +26,12 @@ class MyApp extends StatelessWidget {
         '/getstartedscreen': (context) => const GetStartedScreen(),
         '/home_screen': (context) => const HomeScreen(),
         '/crime_categories_screen': (context) => const CrimeCategoriesScreen(),
+        '/crime_detail_screen': (context) => const CrimeDetailScreen(
+          cityName: cityName,
+          crimeKey: crimeKey,
+          crimeTitle: crimeTitle,
+          localCount: localCount,
+        ),
       },
     );
   }
