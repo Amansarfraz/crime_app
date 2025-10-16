@@ -1,3 +1,4 @@
+import 'package:crime_app/screens/crime_alerts_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
 import 'screens/get_started_screen.dart';
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         '/getstartedscreen': (context) => const GetStartedScreen(),
         '/home_screen': (context) => const HomeScreen(),
         '/crime_categories_screen': (context) => const CrimeCategoriesScreen(),
+        '/crime_alerts_screen': (contest) => const CrimeAlertsScreen(),
       },
 
       // ✅ Handle dynamic routes like CrimeDetailScreen here

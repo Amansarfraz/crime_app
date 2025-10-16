@@ -3,6 +3,7 @@ import 'package:crime_app/screens/crime_categories_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
+import 'crime_alerts_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -312,8 +313,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        // 👉 Navigator lagana yahan (Alerts box par)
-                        // Navigator.push(context, MaterialPageRoute(builder: (context) => const AlertsScreen()));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CrimeAlertsScreen(),
+                          ),
+                        );
                       },
                       child: buildQuickBox(
                         "Alerts",
