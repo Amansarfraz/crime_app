@@ -1,10 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class CrimeAlertsScreen extends StatelessWidget {
-  const CrimeAlertsScreen({super.key});
+  final String city;
+  final String crimeLevel;
+  final List<Map<String, dynamic>> recentSearches;
+
+  const CrimeAlertsScreen({
+    super.key,
+    required this.city,
+    required this.crimeLevel,
+    required this.recentSearches,
+  });
+
+  Color getLevelColor(String level) {
+    switch (level) {
+      case 'High':
+        return Colors.red;
+      case 'Medium':
+        return Colors.orange;
+      case 'Low':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  List<String> getSafetyTips(String level) {
+    switch (level) {
+      case 'High':
+        return [
+          'Avoid walking alone after dark.',
+          'Stay in well-lit public areas.',
+          'Keep emergency contacts handy.',
+        ];
+      case 'Medium':
+        return [
+          'Stay alert and aware of surroundings.',
+          'Avoid isolated locations at night.',
+        ];
+      case 'Low':
+        return [
+          'Maintain regular safety habits.',
+          'Report any suspicious activity.',
+        ];
+      default:
+        return ['Stay cautious and informed.'];
+    }
+  }
+
+  String timeAgo(DateTime time) {
+    final diff = DateTime.now().difference(time);
+    if (diff.inMinutes < 1) return 'Just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes} min ago';
+    if (diff.inHours < 24) return '${diff.inHours} hr ago';
+    return DateFormat('hh:mm a').format(time);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final color = getLevelColor(crimeLevel);
+    final tips = getSafetyTips(crimeLevel);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
@@ -12,7 +69,7 @@ class CrimeAlertsScreen extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {},
+          onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Crime Alerts',
@@ -25,10 +82,15 @@ class CrimeAlertsScreen extends StatelessWidget {
           ),
         ],
       ),
+
+      // ✅ Bottom Navigation
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1,
         selectedItemColor: const Color(0xFF3F51B5),
         unselectedItemColor: Colors.grey,
+        onTap: (index) {
+          if (index == 0) Navigator.pop(context); // back to home
+        },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
@@ -37,6 +99,8 @@ class CrimeAlertsScreen extends StatelessWidget {
           ),
         ],
       ),
+
+      // ✅ Scrollable Body
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -45,12 +109,12 @@ class CrimeAlertsScreen extends StatelessWidget {
             // ===== Last Search Result =====
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text(
+              children: [
+                const Text(
                   'Last Search Result',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
-                Text('2 min ago', style: TextStyle(color: Colors.grey)),
+                Text('2 min ago', style: TextStyle(color: Colors.grey[600])),
               ],
             ),
             const SizedBox(height: 12),
@@ -59,7 +123,7 @@ class CrimeAlertsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFEBEE),
+                color: color.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -68,96 +132,93 @@ class CrimeAlertsScreen extends StatelessWidget {
                   // City + High Risk Badge
                   Row(
                     children: [
-                      const Icon(
-                        Icons.warning_rounded,
-                        color: Colors.red,
-                        size: 40,
-                      ),
+                      Icon(Icons.warning_rounded, color: color, size: 40),
                       const SizedBox(width: 8),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Text(
-                                'Karachi',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: const Text(
-                                  'HIGH RISK',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  city,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: const [
-                              Icon(
-                                Icons.local_fire_department,
-                                color: Colors.red,
-                                size: 16,
-                              ),
-                              SizedBox(width: 4),
-                              Text(
-                                'Crime Rate: 87%',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black87,
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: color,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    '${crimeLevel.toUpperCase()} RISK',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                'Updated: Now',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.local_fire_department,
+                                  color: color,
+                                  size: 16,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Crime Level: $crimeLevel',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  'Updated: Now',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
+
                   // Safety Recommendations
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFCDD2),
+                      color: color.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Column(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Safety Recommendations',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Colors.red,
+                            color: color,
                           ),
                         ),
-                        SizedBox(height: 8),
-                        Text('• Avoid walking alone after dark.'),
-                        Text('• Stay in well lit public areas.'),
-                        Text('• Keep emergency contacts handy.'),
+                        const SizedBox(height: 8),
+                        ...tips.map((t) => Text('• $t')).toList(),
                       ],
                     ),
                   ),
@@ -187,24 +248,26 @@ class CrimeAlertsScreen extends StatelessWidget {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
-            _recentSearch(
-              'Karachi',
-              'High Crime Rate',
-              '2 min ago',
-              Colors.red,
-            ),
-            _recentSearch(
-              'Islamabad',
-              'Low Crime Rate',
-              '1 hour ago',
-              Colors.green,
-            ),
-            _recentSearch(
-              'Rawalpindi',
-              'Medium Crime Rate',
-              '2 hour ago',
-              Colors.orange,
-            ),
+
+            if (recentSearches.isEmpty)
+              const Text(
+                'No recent searches yet.',
+                style: TextStyle(color: Colors.grey),
+              )
+            else
+              Column(
+                children: recentSearches.map((item) {
+                  final time = item['time'] ?? DateTime.now();
+                  final level = item['level'] ?? 'Low';
+                  final city = item['city'] ?? 'Unknown';
+                  return _recentSearch(
+                    city,
+                    level,
+                    timeAgo(time),
+                    getLevelColor(level),
+                  );
+                }).toList(),
+              ),
 
             const SizedBox(height: 20),
 
@@ -257,12 +320,7 @@ class CrimeAlertsScreen extends StatelessWidget {
   }
 
   // ===== Recent Search Widget =====
-  Widget _recentSearch(
-    String city,
-    String status,
-    String time,
-    Color dotColor,
-  ) {
+  Widget _recentSearch(String city, String level, String time, Color dotColor) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
@@ -288,7 +346,10 @@ class CrimeAlertsScreen extends StatelessWidget {
                       fontSize: 15,
                     ),
                   ),
-                  Text(status, style: const TextStyle(color: Colors.black54)),
+                  Text(
+                    'Crime Level: $level',
+                    style: const TextStyle(color: Colors.black54),
+                  ),
                 ],
               ),
             ],

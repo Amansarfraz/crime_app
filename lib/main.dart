@@ -29,7 +29,12 @@ class MyApp extends StatelessWidget {
         '/getstartedscreen': (context) => const GetStartedScreen(),
         '/home_screen': (context) => const HomeScreen(),
         '/crime_categories_screen': (context) => const CrimeCategoriesScreen(),
-        '/crime_alerts_screen': (contest) => const CrimeAlertsScreen(),
+        // ❌ Fixed: added required parameters for CrimeAlertsScreen
+        '/crime_alerts_screen': (context) => CrimeAlertsScreen(
+          city: 'Lahore',
+          crimeLevel: 'High',
+          recentSearches: const [],
+        ),
       },
 
       // ✅ Handle dynamic routes like CrimeDetailScreen here

@@ -15,13 +15,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _controller = TextEditingController();
   String? _crimeLevel;
-  List<Map<String, String>> recentSearches = [];
+  List<Map<String, dynamic>> recentSearches = [];
 
   Future<void> fetchCrimeRate(String city) async {
     if (city.isEmpty) return;
 
     final normalizedCity = city.trim().toLowerCase();
-
     const pakistanApi =
         'https://api.jsonbin.io/v3/b/6718f0e2e41b4d34e4c9f82a/latest';
 
@@ -36,7 +35,11 @@ class _HomeScreenState extends State<HomeScreen> {
             String level = record[key];
             setState(() {
               _crimeLevel = level;
-              recentSearches.insert(0, {'city': city, 'level': level});
+              recentSearches.insert(0, {
+                'city': city,
+                'level': level,
+                'time': DateTime.now(),
+              });
             });
             return;
           }
@@ -63,7 +66,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       _crimeLevel = level;
-      recentSearches.insert(0, {'city': city, 'level': level});
+      recentSearches.insert(0, {
+        'city': city,
+        'level': level,
+        'time': DateTime.now(),
+      });
     });
   }
 
@@ -95,18 +102,12 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
               icon: const Icon(Icons.home),
               color: const Color(0xFF2209B4),
-              onPressed: () {
-                // 👉 Navigator lagana yahan (Home icon click par)
-                // Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
-              },
+              onPressed: () {},
             ),
             IconButton(
               icon: const Icon(Icons.notifications_none),
               color: Colors.grey,
-              onPressed: () {
-                // 👉 Navigator lagana yahan (Bell icon click par)
-                // Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationsScreen()));
-              },
+              onPressed: () {},
             ),
           ],
         ),
@@ -118,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🌟 Top Blue Bar with Bell Icon
+              // 🌟 Top Bar
               Container(
                 width: double.infinity,
                 height: 80,
@@ -166,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 20),
 
-              // 🔍 Search Bar + Button
+              // 🔍 Search Bar
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
@@ -204,8 +205,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     SizedBox(
                       height: 50,
                       child: ElevatedButton(
-                        onPressed: () {
-                          fetchCrimeRate(_controller.text);
+                        onPressed: () async {
+                          await fetchCrimeRate(_controller.text);
+                          if (_crimeLevel != null) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CrimeAlertsScreen(
+                                  city: _controller.text,
+                                  crimeLevel: _crimeLevel!,
+                                  recentSearches: recentSearches,
+                                ),
+                              ),
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2209B4),
@@ -228,13 +241,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 30),
 
-              // 🧾 Crime Level Output
               if (_crimeLevel != null)
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
                       Text(
@@ -284,24 +293,11 @@ class _HomeScreenState extends State<HomeScreen> {
               // ⚡ Quick Access
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  "Quick Access",
-                  style: GoogleFonts.poppins(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
                       onTap: () {
-                        // 👉 Navigator lagana yahan (Crime Categories box par)
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -313,40 +309,23 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CrimeAlertsScreen(),
-                          ),
-                        );
+                        if (_crimeLevel != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CrimeAlertsScreen(
+                                city: _controller.text,
+                                crimeLevel: _crimeLevel!,
+                                recentSearches: recentSearches,
+                              ),
+                            ),
+                          );
+                        }
                       },
                       child: buildQuickBox(
                         "Alerts",
                         Icons.warning_amber_rounded,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        // 👉 Navigator lagana yahan (Safety Tips box par)
-                        // Navigator.push(context, MaterialPageRoute(builder: (context) => const SafetyTipsScreen()));
-                      },
-                      child: buildQuickBox("Safety Tips", Icons.verified_user),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        // 👉 Navigator lagana yahan (Settings box par)
-                        // Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()));
-                      },
-                      child: buildQuickBox("Settings", Icons.settings),
                     ),
                   ],
                 ),
@@ -373,10 +352,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: recentSearches.map((item) {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8),
-                      child: buildSearchTile(
-                        item['city']!,
-                        item['level'] ?? 'Medium',
-                      ),
+                      child: buildSearchTile(item['city']!, item['level']!),
                     );
                   }).toList(),
                 ),
