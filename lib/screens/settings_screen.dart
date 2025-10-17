@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'about_app_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -32,7 +33,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             height: 80,
             width: double.infinity,
             color: const Color(0xFF2209B4),
-            padding: const EdgeInsets.only(top: 35, left: 16, right: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
                 GestureDetector(
@@ -44,13 +45,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Text(
-                  "Setting",
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 20,
+                const Expanded(
+                  child: Center(
+                    child: Text(
+                      "Setting",
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 20,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -87,7 +92,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           // ℹ️ About App
           _buildSettingTile(
-            icon: Icons.info,
+            icon: Icons.info_outline,
             color: Colors.blue.shade100,
             title: "About App",
             subtitle: "Developer information",
@@ -96,7 +101,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               color: Colors.grey,
               size: 18,
             ),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AboutAppScreen()),
+              );
+            },
           ),
 
           // 🌍 Language
@@ -115,17 +125,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const Spacer(),
 
-          // 🛡 App Logo + Name
+          // 🛡 Custom Shield Logo + Name
           Column(
             children: [
-              Container(
-                width: 70,
-                height: 70,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF2209B4),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.shield, color: Colors.white, size: 40),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF2209B4),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  Icon(Icons.shield, size: 60, color: Colors.white),
+                  const Positioned(
+                    bottom: 25,
+                    child: CircleAvatar(
+                      radius: 10,
+                      backgroundColor: Colors.white,
+                      child: Icon(
+                        Icons.check,
+                        size: 14,
+                        color: Color(0xFF2209B4),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               const Text(
@@ -155,7 +182,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: Colors.grey,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 25),
             ],
           ),
         ],
@@ -163,7 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // 📱 Custom Tile Widget
+  // 📱 Reusable Setting Tile
   Widget _buildSettingTile({
     required IconData icon,
     required Color color,
@@ -252,7 +279,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 setState(() {
                   selectedLanguage = value!;
                   Navigator.pop(context);
-                  // 🌐 TODO: Add actual app localization here if needed
                 });
               },
             );
