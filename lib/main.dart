@@ -1,10 +1,12 @@
 import 'package:crime_app/screens/crime_alerts_screen.dart';
+import 'package:crime_app/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
 import 'screens/get_started_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/crime_categories_screen.dart';
 import 'screens/crime_detail_screen.dart';
+import 'screens/safety_tips_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,6 +37,8 @@ class MyApp extends StatelessWidget {
           crimeLevel: 'High',
           recentSearches: const [],
         ),
+        '/safety_tips_screen': (context) => const SafetyTipsScreen(),
+        '/settings_screen': (context) => const SettingsScreen(),
       },
 
       // ✅ Handle dynamic routes like CrimeDetailScreen here

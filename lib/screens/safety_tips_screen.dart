@@ -31,7 +31,7 @@ class SafetyTipsScreen extends StatelessWidget {
             width: double.infinity,
             height: 80,
             color: const Color(0xFF2209B4),
-            padding: const EdgeInsets.only(top: 35, left: 16, right: 16),
+            padding: const EdgeInsets.only(top: 25, left: 16, right: 16),
             child: Row(
               children: [
                 GestureDetector(
