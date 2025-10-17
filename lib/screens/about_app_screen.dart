@@ -10,7 +10,7 @@ class AboutAppScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF6F7FB),
       body: Column(
         children: [
-          // 🔷 Header
+          // Header
           Container(
             height: 80,
             color: const Color(0xFF2209B4),
@@ -41,15 +41,16 @@ class AboutAppScreen extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          // 🎬 Animation
+          // 🚓 Police car animation from Lottie
           Lottie.network(
             'https://assets10.lottiefiles.com/packages/lf20_3rwasyjy.json',
+            // <-- Replace this with actual police car JSON URL or asset path
             height: 180,
           ),
 
           const SizedBox(height: 10),
 
-          // 📱 App Info
+          // App Info
           const Text(
             "Crime Rate Alert",
             style: TextStyle(
@@ -71,7 +72,7 @@ class AboutAppScreen extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          // 💬 Description
+          // Description
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
@@ -90,7 +91,7 @@ class AboutAppScreen extends StatelessWidget {
 
           const SizedBox(height: 30),
 
-          // 🟦 Blue Circle with Image (you’ll add your image)
+          // Blue circle with image placeholder
           Stack(
             alignment: Alignment.center,
             children: [
@@ -104,7 +105,7 @@ class AboutAppScreen extends StatelessWidget {
               ),
               ClipOval(
                 child: Image.asset(
-                  'assets/images/Group.png', // 🔄 Replace with your path
+                  'assets/images/Group.png', // your image path
                   width: 90,
                   height: 90,
                   fit: BoxFit.cover,
@@ -115,7 +116,7 @@ class AboutAppScreen extends StatelessWidget {
 
           const SizedBox(height: 25),
 
-          // 🛡 Logo Section (moved slightly up)
+          // Logo section
           Column(
             children: [
               Stack(
