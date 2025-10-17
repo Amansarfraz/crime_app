@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:crime_app/screens/crime_categories_screen.dart';
+import 'package:crime_app/screens/crime_alerts_screen.dart';
+//import 'package:crime_app/screens/safety_tips_screen.dart';
+//import 'package:crime_app/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
-import 'crime_alerts_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -208,16 +210,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         onPressed: () async {
                           await fetchCrimeRate(_controller.text);
                           if (_crimeLevel != null) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CrimeAlertsScreen(
-                                  city: _controller.text,
-                                  crimeLevel: _crimeLevel!,
-                                  recentSearches: recentSearches,
-                                ),
-                              ),
-                            );
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) => CrimeAlertsScreen(
+                            //       city: _controller.text,
+                            //       crimeLevel: _crimeLevel!,
+                            //       recentSearches: recentSearches,
+                            //     ),
+                            //   ),
+                            // );
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -290,7 +292,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 20),
 
-              // ⚡ Quick Access
+              // ⚡ Quick Access Row 1
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
@@ -326,6 +328,34 @@ class _HomeScreenState extends State<HomeScreen> {
                         "Alerts",
                         Icons.warning_amber_rounded,
                       ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        // 👉 Navigate to Safety Tips Screen
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(builder: (context) => const SafetyTipsScreen()),
+                        // );
+                      },
+                      child: buildQuickBox("Safety Tips", Icons.verified_user),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        // 👉 Navigate to Settings Screen
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                        // );
+                      },
+                      child: buildQuickBox("Settings", Icons.settings),
                     ),
                   ],
                 ),
