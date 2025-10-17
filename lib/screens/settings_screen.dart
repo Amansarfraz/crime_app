@@ -138,7 +138,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 child: ClipOval(
                   child: Image.asset(
-                    'assets/images/your_logo.png', // 👈 Put your own path here
+                    'assets/images/Group.png', // 👈 Put your own path here
                     fit: BoxFit.cover,
                   ),
                 ),
