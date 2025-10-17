@@ -126,21 +126,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 30),
 
-          // 🟦 Blue Circle + Image Path Placeholder
+          // 🖼️ Image Placeholder Only (no logo icons)
           Column(
             children: [
-              Container(
-                width: 100,
-                height: 100,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF2209B4),
-                  shape: BoxShape.circle,
-                ),
-                child: ClipOval(
-                  child: Image.asset(
-                    'assets/images/Group.png', // 👈 Put your own path here
-                    fit: BoxFit.cover,
-                  ),
+              ClipOval(
+                child: Image.asset(
+                  'assets/images/Group.png', // 👈 Put your own image path here
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(height: 12),

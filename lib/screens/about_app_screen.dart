@@ -10,7 +10,7 @@ class AboutAppScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF6F7FB),
       body: Column(
         children: [
-          // Header
+          // 🔷 Header
           Container(
             height: 80,
             color: const Color(0xFF2209B4),
@@ -41,15 +41,15 @@ class AboutAppScreen extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          // 🚓 Animation placeholder — change this path to your police + car animation
+          // 🚓 Police car animation (you can change this path)
           Lottie.asset(
-            'assets/animations/police_car.json', // ← Replace with your own file path
+            'assets/animations/police.json', // 👈 Replace with your animation file path
             height: 180,
           ),
 
           const SizedBox(height: 10),
 
-          // App Info
+          // 📱 App Info
           const Text(
             "Crime Rate Alert",
             style: TextStyle(
@@ -71,7 +71,7 @@ class AboutAppScreen extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          // Description
+          // 💬 Description
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
@@ -90,70 +90,18 @@ class AboutAppScreen extends StatelessWidget {
 
           const SizedBox(height: 30),
 
-          // Blue circle + image placeholder
-          Stack(
-            alignment: Alignment.center,
+          // 🟦 Single image only (no icons or extra logos)
+          Column(
             children: [
-              Container(
-                width: 120,
-                height: 120,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF2209B4),
-                  shape: BoxShape.circle,
-                ),
-              ),
               ClipOval(
                 child: Image.asset(
-                  'assets/images/police.png', // ← Replace this with your image path
-                  width: 90,
-                  height: 90,
+                  'assets/images/Group.png', // 👈 Replace with your image path
+                  width: 100,
+                  height: 100,
                   fit: BoxFit.cover,
                 ),
               ),
-            ],
-          ),
-
-          const SizedBox(height: 25),
-
-          // Logo section
-          Column(
-            children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 70,
-                    height: 70,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF2209B4),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.shield,
-                      color: Color(0xFF2209B4),
-                      size: 28,
-                    ),
-                  ),
-                  const Positioned(
-                    bottom: 5,
-                    right: 8,
-                    child: Icon(
-                      Icons.check_circle,
-                      color: Color(0xFF2209B4),
-                      size: 18,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               const Text(
                 "Stay Informed, Stay Safe",
                 style: TextStyle(
@@ -162,7 +110,6 @@ class AboutAppScreen extends StatelessWidget {
                   fontSize: 14,
                 ),
               ),
-              const SizedBox(height: 25),
             ],
           ),
         ],
