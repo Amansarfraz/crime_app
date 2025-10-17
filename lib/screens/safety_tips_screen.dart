@@ -12,44 +12,61 @@ class SafetyTipsScreen extends StatelessWidget {
       "Don’t share personal information with strangers including your full name, address, number, or financial details. Be cautious of social engineering attempts.",
       "Trust your instincts. If something feels wrong or unsafe, remove yourself from the situation immediately and seek help from authorities or trusted individuals.",
       "Keep your mobile phone charged and carry a portable charger. Ensure location services are enabled for emergency situations and share your location with trusted contacts.",
+      "Lock your home and vehicles properly. Install security cameras or smart locks if possible for better protection.",
+      "Avoid displaying expensive jewelry or gadgets in public places to reduce the risk of theft.",
+      "Be careful when using ATMs at night or in isolated areas. Use well-lit machines and stay alert to your surroundings.",
+      "Stay informed about local crime alerts or safety updates through official apps or community groups.",
     ];
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: const Color(0xFFF3F4F6),
       body: Column(
         children: [
-          // 🔵 Header Bar
+          // 🌈 Gradient Header
           Container(
             width: double.infinity,
             padding: const EdgeInsets.only(
-              top: 50,
+              top: 55,
               left: 16,
               right: 16,
-              bottom: 16,
+              bottom: 18,
             ),
             decoration: const BoxDecoration(
-              color: Color(0xFF1E3A8A), // Deep blue color
+              gradient: LinearGradient(
+                colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(16),
-                bottomRight: Radius.circular(16),
+                bottomLeft: Radius.circular(18),
+                bottomRight: Radius.circular(18),
               ),
             ),
             child: Row(
               children: [
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: const Icon(Icons.arrow_back, color: Colors.white),
-                ),
-                const SizedBox(width: 10),
-                const Text(
-                  "Safety Tips",
-                  style: TextStyle(
+                  child: const Icon(
+                    Icons.arrow_back,
                     color: Colors.white,
-                    fontSize: 20,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
+                    size: 26,
                   ),
                 ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    "Safety Tips",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 26), // space balance for back arrow
               ],
             ),
           ),
@@ -57,49 +74,66 @@ class SafetyTipsScreen extends StatelessWidget {
           // 🔽 Tips List
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
               child: Column(
-                children: tips
-                    .map(
-                      (tip) => Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                children: tips.asMap().entries.map((entry) {
+                  final index = entry.key + 1;
+                  final tip = entry.value;
+
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    margin: const EdgeInsets.only(bottom: 14),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.06),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
                         ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(
-                              Icons.radio_button_checked,
-                              color: Color(0xFF1E3A8A),
-                              size: 20,
+                      ],
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          height: 32,
+                          width: 32,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                tip,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  height: 1.5,
-                                  fontFamily: 'Poppins',
-                                  color: Colors.black87,
-                                ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              "$index",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    )
-                    .toList(),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            tip,
+                            style: const TextStyle(
+                              fontSize: 14.5,
+                              height: 1.6,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
               ),
             ),
           ),
