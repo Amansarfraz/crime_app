@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 
 class AboutAppScreen extends StatelessWidget {
   const AboutAppScreen({super.key});
@@ -39,15 +38,31 @@ class AboutAppScreen extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 40),
 
-          // 🚓 Police car animation (replace with your image or lottie)
-          Lottie.asset(
-            'assets/images/police.png', // 👈 Replace if needed
-            height: 180,
+          // 🟦 Blue Circle with Icon
+          Container(
+            width: 110,
+            height: 110,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0xFF2209B4), // same as header color
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.shield_outlined, // 👈 Your app icon (can change)
+              color: Colors.white,
+              size: 55,
+            ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 20),
 
           // 📱 App Info
           const Text(
@@ -90,7 +105,7 @@ class AboutAppScreen extends StatelessWidget {
 
           const SizedBox(height: 30),
 
-          // 🟦 Circular logo with blue background
+          // 🟦 Circular image logo (your custom path)
           Column(
             children: [
               Container(
@@ -98,13 +113,13 @@ class AboutAppScreen extends StatelessWidget {
                 height: 110,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFF2209B4), // same as header color
+                  color: Color(0xFF2209B4),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(10), // spacing inside circle
+                  padding: const EdgeInsets.all(10),
                   child: ClipOval(
                     child: Image.asset(
-                      'assets/images/Group.png', // 👈 your image path
+                      'assets/images/Group.png', // 👈 replace with your image path
                       fit: BoxFit.cover,
                     ),
                   ),
