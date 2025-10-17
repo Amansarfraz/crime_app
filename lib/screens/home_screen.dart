@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:crime_app/screens/crime_categories_screen.dart';
 import 'package:crime_app/screens/crime_alerts_screen.dart';
-//import 'package:crime_app/screens/safety_tips_screen.dart';
+import 'package:crime_app/screens/safety_tips_screen.dart';
 //import 'package:crime_app/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -341,10 +341,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     GestureDetector(
                       onTap: () {
                         // 👉 Navigate to Safety Tips Screen
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) => const SafetyTipsScreen()),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SafetyTipsScreen(),
+                          ),
+                        );
                       },
                       child: buildQuickBox("Safety Tips", Icons.verified_user),
                     ),
