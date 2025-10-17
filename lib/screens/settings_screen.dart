@@ -37,17 +37,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Expanded(
-                  child: Center(
-                    child: Text(
-                      "Settings",
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 20,
-                      ),
-                    ),
+                const Text(
+                  "Settings",
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 20,
                   ),
                 ),
               ],
@@ -157,22 +153,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 20),
 
-          // 🟦 Blue Circle with Image on top
+          // 🟦 Bigger Blue Circle with Image
           Stack(
             alignment: Alignment.center,
             children: [
               Container(
-                width: 120,
-                height: 120,
+                width: 150, // increased size
+                height: 150, // increased size
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFF2209B4), // same color as header
+                  color: Color(0xFF2209B4),
                 ),
               ),
               Image.asset(
                 'assets/images/Group.png', // 👈 your image path
-                width: 80,
-                height: 80,
+                width: 95,
+                height: 95,
                 fit: BoxFit.cover,
               ),
             ],
