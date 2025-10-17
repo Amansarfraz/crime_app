@@ -20,7 +20,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       backgroundColor: const Color(0xFFF6F7FB),
       body: Column(
         children: [
-          // 🔷 Header (Settings with arrow)
+          // 🔷 Header
           Container(
             height: 80,
             width: double.infinity,
@@ -37,13 +37,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Text(
-                  "Settings",
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 20,
+                const Expanded(
+                  child: Center(
+                    child: Text(
+                      "Settings",
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 20,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -122,23 +126,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           const SizedBox(height: 30),
 
-          // 🟦 Blue circular background + image (replacing logo)
-          Container(
-            width: 120,
-            height: 120,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color(0xFF2209B4), // same color as header
+          // 📱 App Info (Keep this area as it is)
+          const Text(
+            "Crime Rate Alert",
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
+              color: Colors.black,
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: ClipOval(
-                child: Image.asset(
-                  'assets/images/Group.png', // 👈 your image path here
-                  fit: BoxFit.cover,
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            "Version 1.0.0",
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              color: Colors.grey,
+              fontSize: 13,
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            "Stay Informed, Stay Safe",
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 13,
+              color: Colors.grey,
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // 🟦 Blue Circle with Image on top
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 120,
+                height: 120,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFF2209B4), // same color as header
                 ),
               ),
-            ),
+              Image.asset(
+                'assets/images/Group.png', // 👈 your image path
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+              ),
+            ],
           ),
         ],
       ),
