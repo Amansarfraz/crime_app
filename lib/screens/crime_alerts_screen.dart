@@ -129,7 +129,6 @@ class CrimeAlertsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // City + High Risk Badge
                   Row(
                     children: [
                       Icon(Icons.warning_rounded, color: color, size: 40),
@@ -200,7 +199,6 @@ class CrimeAlertsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // Safety Recommendations
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -236,8 +234,18 @@ class CrimeAlertsScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _quickAction(Icons.search, 'Search'),
-                _quickAction(Icons.phone, 'Emergency'),
+                _quickAction(
+                  context,
+                  Icons.search,
+                  'Search',
+                  () => _showSearchDialog(context),
+                ),
+                _quickAction(
+                  context,
+                  Icons.phone,
+                  'Emergency',
+                  () => _showEmergencySheet(context),
+                ),
               ],
             ),
             const SizedBox(height: 20),
@@ -271,7 +279,6 @@ class CrimeAlertsScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // ===== Beginner Tip =====
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -299,23 +306,110 @@ class CrimeAlertsScreen extends StatelessWidget {
   }
 
   // ===== Quick Action Widget =====
-  Widget _quickAction(IconData icon, String label) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300),
-            borderRadius: BorderRadius.circular(12),
+  Widget _quickAction(
+    BuildContext context,
+    IconData icon,
+    String label,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.grey.shade800, size: 28),
           ),
-          child: Icon(icon, color: Colors.grey.shade800, size: 28),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ===== Emergency Sheet =====
+  void _showEmergencySheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Text(
+              'Emergency Contacts',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.redAccent,
+              ),
+            ),
+            SizedBox(height: 12),
+            ListTile(
+              leading: Icon(Icons.local_police, color: Colors.blue),
+              title: Text('Police'),
+              trailing: Text('15'),
+            ),
+            ListTile(
+              leading: Icon(Icons.local_hospital, color: Colors.green),
+              title: Text('Ambulance'),
+              trailing: Text('1122'),
+            ),
+            ListTile(
+              leading: Icon(Icons.fire_truck, color: Colors.orange),
+              title: Text('Fire Brigade'),
+              trailing: Text('16'),
+            ),
+          ],
         ),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+      ),
+    );
+  }
+
+  // ===== Search Dialog =====
+  void _showSearchDialog(BuildContext context) {
+    final controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Search City'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'Enter city name...',
+            border: OutlineInputBorder(),
+          ),
         ),
-      ],
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final query = controller.text.trim();
+              if (query.isNotEmpty) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Searching for "$query"...')),
+                );
+              }
+            },
+            child: const Text('Search'),
+          ),
+        ],
+      ),
     );
   }
 
