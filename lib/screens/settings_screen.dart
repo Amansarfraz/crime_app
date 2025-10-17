@@ -93,20 +93,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
               color: Colors.grey,
               size: 18,
             ),
-            onTap: () {
-              Navigator.push(
+            onTap: () async {
+              final result = await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const LanguageScreen()),
               );
+
+              if (result != null && result is String) {
+                setState(() => selectedLanguage = result);
+              }
             },
           ),
 
           // ℹ️ About App
           _buildSettingTile(
-            icon: Icons.info,
+            icon: Icons.info_outline,
             color: Colors.blue.shade100,
             title: "About App",
-            subtitle: "Developer information",
+            subtitle: "App information",
             trailing: const Icon(
               Icons.arrow_forward_ios,
               color: Colors.grey,
@@ -120,45 +124,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
           ),
 
-          const Spacer(),
+          const SizedBox(height: 30),
 
-          // 🛡 Custom Logo
+          // 🟦 Blue Circle + Image Path Placeholder
           Column(
             children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF2209B4),
-                      shape: BoxShape.circle,
-                    ),
+              Container(
+                width: 100,
+                height: 100,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF2209B4),
+                  shape: BoxShape.circle,
+                ),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/images/your_logo.png', // 👈 Put your own path here
+                    fit: BoxFit.cover,
                   ),
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.shield,
-                      color: Color(0xFF2209B4),
-                      size: 32,
-                    ),
-                  ),
-                  const Positioned(
-                    bottom: 6,
-                    right: 10,
-                    child: Icon(
-                      Icons.check_circle,
-                      color: Color(0xFF2209B4),
-                      size: 20,
-                    ),
-                  ),
-                ],
+                ),
               ),
               const SizedBox(height: 12),
               const Text(
@@ -170,7 +153,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               const Text(
                 "Version 1.0.0",
                 style: TextStyle(
@@ -179,7 +162,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   fontSize: 13,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               const Text(
                 "Stay Informed, Stay Safe",
                 style: TextStyle(
@@ -188,7 +171,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: Colors.grey,
                 ),
               ),
-              const SizedBox(height: 20),
             ],
           ),
         ],

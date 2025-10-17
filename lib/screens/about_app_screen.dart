@@ -41,7 +41,7 @@ class AboutAppScreen extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          // 🎬 Animation (using Lottie)
+          // 🎬 Animation
           Lottie.network(
             'https://assets10.lottiefiles.com/packages/lf20_3rwasyjy.json',
             height: 180,
@@ -88,25 +88,50 @@ class AboutAppScreen extends StatelessWidget {
             ),
           ),
 
-          const Spacer(),
+          const SizedBox(height: 30),
 
-          // 🛡 Custom Logo
+          // 🟦 Blue Circle with Image (you’ll add your image)
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 120,
+                height: 120,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF2209B4),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              ClipOval(
+                child: Image.asset(
+                  'assets/images/Group.png', // 🔄 Replace with your path
+                  width: 90,
+                  height: 90,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 25),
+
+          // 🛡 Logo Section (moved slightly up)
           Column(
             children: [
               Stack(
                 alignment: Alignment.center,
                 children: [
                   Container(
-                    width: 80,
-                    height: 80,
+                    width: 70,
+                    height: 70,
                     decoration: const BoxDecoration(
                       color: Color(0xFF2209B4),
                       shape: BoxShape.circle,
                     ),
                   ),
                   Container(
-                    width: 60,
-                    height: 60,
+                    width: 52,
+                    height: 52,
                     decoration: const BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
@@ -114,16 +139,16 @@ class AboutAppScreen extends StatelessWidget {
                     child: const Icon(
                       Icons.shield,
                       color: Color(0xFF2209B4),
-                      size: 32,
+                      size: 28,
                     ),
                   ),
                   const Positioned(
-                    bottom: 6,
-                    right: 10,
+                    bottom: 5,
+                    right: 8,
                     child: Icon(
                       Icons.check_circle,
                       color: Color(0xFF2209B4),
-                      size: 20,
+                      size: 18,
                     ),
                   ),
                 ],
