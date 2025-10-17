@@ -41,9 +41,9 @@ class AboutAppScreen extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          // 🚓 Police car animation (you can change this path)
+          // 🚓 Police car animation (replace with your image or lottie)
           Lottie.asset(
-            'assets/animations/police.json', // 👈 Replace with your animation file path
+            'assets/images/police.png', // 👈 Replace if needed
             height: 180,
           ),
 
@@ -90,15 +90,24 @@ class AboutAppScreen extends StatelessWidget {
 
           const SizedBox(height: 30),
 
-          // 🟦 Single image only (no icons or extra logos)
+          // 🟦 Circular logo with blue background
           Column(
             children: [
-              ClipOval(
-                child: Image.asset(
-                  'assets/images/Group.png', // 👈 Replace with your image path
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.cover,
+              Container(
+                width: 110,
+                height: 110,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFF2209B4), // same as header color
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10), // spacing inside circle
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/images/Group.png', // 👈 your image path
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
