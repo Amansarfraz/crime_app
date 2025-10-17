@@ -41,10 +41,9 @@ class AboutAppScreen extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          // 🚓 Police car animation from Lottie
-          Lottie.network(
-            'https://assets10.lottiefiles.com/packages/lf20_3rwasyjy.json',
-            // <-- Replace this with actual police car JSON URL or asset path
+          // 🚓 Animation placeholder — change this path to your police + car animation
+          Lottie.asset(
+            'assets/animations/police_car.json', // ← Replace with your own file path
             height: 180,
           ),
 
@@ -91,7 +90,7 @@ class AboutAppScreen extends StatelessWidget {
 
           const SizedBox(height: 30),
 
-          // Blue circle with image placeholder
+          // Blue circle + image placeholder
           Stack(
             alignment: Alignment.center,
             children: [
@@ -105,7 +104,7 @@ class AboutAppScreen extends StatelessWidget {
               ),
               ClipOval(
                 child: Image.asset(
-                  'assets/images/Group.png', // your image path
+                  'assets/images/police.png', // ← Replace this with your image path
                   width: 90,
                   height: 90,
                   fit: BoxFit.cover,
