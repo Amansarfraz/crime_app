@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:math';
 
 class CrimeAlertsScreen extends StatelessWidget {
   final String city;
@@ -83,13 +84,12 @@ class CrimeAlertsScreen extends StatelessWidget {
         ],
       ),
 
-      // ✅ Bottom Navigation
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1,
         selectedItemColor: const Color(0xFF3F51B5),
         unselectedItemColor: Colors.grey,
         onTap: (index) {
-          if (index == 0) Navigator.pop(context); // back to home
+          if (index == 0) Navigator.pop(context);
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
@@ -100,13 +100,11 @@ class CrimeAlertsScreen extends StatelessWidget {
         ],
       ),
 
-      // ✅ Scrollable Body
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ===== Last Search Result =====
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -119,7 +117,6 @@ class CrimeAlertsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // ===== Crime Alert Card =====
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -198,7 +195,6 @@ class CrimeAlertsScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -225,7 +221,6 @@ class CrimeAlertsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // ===== Quick Actions =====
             const Text(
               'Quick Actions',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -250,7 +245,6 @@ class CrimeAlertsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // ===== Recent Searches =====
             const Text(
               'Recent Searches',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -276,7 +270,6 @@ class CrimeAlertsScreen extends StatelessWidget {
                   );
                 }).toList(),
               ),
-
             const SizedBox(height: 20),
 
             Container(
@@ -376,9 +369,10 @@ class CrimeAlertsScreen extends StatelessWidget {
     );
   }
 
-  // ===== Search Dialog =====
+  // ===== Search Dialog with Navigation =====
   void _showSearchDialog(BuildContext context) {
     final controller = TextEditingController();
+    final random = Random();
 
     showDialog(
       context: context,
@@ -401,8 +395,27 @@ class CrimeAlertsScreen extends StatelessWidget {
               final query = controller.text.trim();
               if (query.isNotEmpty) {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Searching for "$query"...')),
+                final randomLevel = [
+                  'High',
+                  'Medium',
+                  'Low',
+                ][random.nextInt(3)];
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CrimeAlertsScreen(
+                      city: query,
+                      crimeLevel: randomLevel,
+                      recentSearches: [
+                        {
+                          'city': city,
+                          'level': crimeLevel,
+                          'time': DateTime.now(),
+                        },
+                        ...recentSearches,
+                      ],
+                    ),
+                  ),
                 );
               }
             },
