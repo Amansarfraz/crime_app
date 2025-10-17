@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'language_screen.dart';
 import 'about_app_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -13,15 +14,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool notifications = true;
   String selectedLanguage = 'English';
 
-  final List<String> languages = [
-    'English',
-    'Urdu',
-    'Spanish',
-    'French',
-    'German',
-    'Arabic',
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,7 +25,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             height: 80,
             width: double.infinity,
             color: const Color(0xFF2209B4),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.only(top: 35, left: 16, right: 16),
             child: Row(
               children: [
                 GestureDetector(
@@ -48,7 +40,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const Expanded(
                   child: Center(
                     child: Text(
-                      "Setting",
+                      "Settings",
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         color: Colors.white,
@@ -90,25 +82,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
 
-          // ℹ️ About App
-          _buildSettingTile(
-            icon: Icons.info_outline,
-            color: Colors.blue.shade100,
-            title: "About App",
-            subtitle: "Developer information",
-            trailing: const Icon(
-              Icons.arrow_forward_ios,
-              color: Colors.grey,
-              size: 18,
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AboutAppScreen()),
-              );
-            },
-          ),
-
           // 🌍 Language
           _buildSettingTile(
             icon: Icons.language,
@@ -120,12 +93,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
               color: Colors.grey,
               size: 18,
             ),
-            onTap: _showLanguageDialog,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LanguageScreen()),
+              );
+            },
+          ),
+
+          // ℹ️ About App
+          _buildSettingTile(
+            icon: Icons.info,
+            color: Colors.blue.shade100,
+            title: "About App",
+            subtitle: "Developer information",
+            trailing: const Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.grey,
+              size: 18,
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AboutAppScreen()),
+              );
+            },
           ),
 
           const Spacer(),
 
-          // 🛡 Custom Shield Logo + Name
+          // 🛡 Custom Logo
           Column(
             children: [
               Stack(
@@ -139,17 +136,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       shape: BoxShape.circle,
                     ),
                   ),
-                  Icon(Icons.shield, size: 60, color: Colors.white),
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.shield,
+                      color: Color(0xFF2209B4),
+                      size: 32,
+                    ),
+                  ),
                   const Positioned(
-                    bottom: 25,
-                    child: CircleAvatar(
-                      radius: 10,
-                      backgroundColor: Colors.white,
-                      child: Icon(
-                        Icons.check,
-                        size: 14,
-                        color: Color(0xFF2209B4),
-                      ),
+                    bottom: 6,
+                    right: 10,
+                    child: Icon(
+                      Icons.check_circle,
+                      color: Color(0xFF2209B4),
+                      size: 20,
                     ),
                   ),
                 ],
@@ -182,7 +188,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: Colors.grey,
                 ),
               ),
-              const SizedBox(height: 25),
+              const SizedBox(height: 20),
             ],
           ),
         ],
@@ -190,7 +196,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // 📱 Reusable Setting Tile
+  // 📱 Setting Tile Widget
   Widget _buildSettingTile({
     required IconData icon,
     required Color color,
@@ -253,36 +259,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             if (trailing != null) trailing,
           ],
-        ),
-      ),
-    );
-  }
-
-  // 🌍 Language Selector Dialog
-  void _showLanguageDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text(
-          "Choose Language",
-          style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: languages.map((lang) {
-            return RadioListTile<String>(
-              title: Text(lang, style: const TextStyle(fontFamily: 'Poppins')),
-              value: lang,
-              groupValue: selectedLanguage,
-              activeColor: const Color(0xFF2209B4),
-              onChanged: (value) {
-                setState(() {
-                  selectedLanguage = value!;
-                  Navigator.pop(context);
-                });
-              },
-            );
-          }).toList(),
         ),
       ),
     );

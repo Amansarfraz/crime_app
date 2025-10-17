@@ -8,6 +8,7 @@ import 'screens/crime_categories_screen.dart';
 import 'screens/crime_detail_screen.dart';
 import 'screens/safety_tips_screen.dart';
 import 'screens/about_app_screen.dart';
+import 'screens/language_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
         '/safety_tips_screen': (context) => const SafetyTipsScreen(),
         '/settings_screen': (context) => const SettingsScreen(),
         '/about_app_screen': (context) => const AboutAppScreen(),
+        '/language_screen': (context) => const LanguageScreen(),
       },
 
       // ✅ Handle dynamic routes like CrimeDetailScreen here
