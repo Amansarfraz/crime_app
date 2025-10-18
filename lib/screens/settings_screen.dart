@@ -18,162 +18,164 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7FB),
-      body: Column(
-        children: [
-          // 🔷 Header
-          Container(
-            height: 80,
-            width: double.infinity,
-            color: const Color(0xFF2209B4),
-            padding: const EdgeInsets.only(top: 35, left: 16, right: 16),
-            child: Row(
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // 🔷 Header
+            Container(
+              height: 80,
+              width: double.infinity,
+              color: const Color(0xFF2209B4),
+              padding: const EdgeInsets.only(top: 35, left: 16, right: 16),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 26,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    "Settings",
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // ⚫ Dark Mode
+            _buildSettingTile(
+              icon: Icons.dark_mode,
+              color: Colors.blue.shade100,
+              title: "Dark Mode",
+              subtitle: "Switch to dark mode",
+              trailing: Switch(
+                value: darkMode,
+                activeColor: const Color(0xFF2209B4),
+                onChanged: (value) => setState(() => darkMode = value),
+              ),
+            ),
+
+            // 🔔 Notifications
+            _buildSettingTile(
+              icon: Icons.notifications_active,
+              color: Colors.blue.shade200,
+              title: "Notifications",
+              subtitle: "Enable push notifications",
+              trailing: Switch(
+                value: notifications,
+                activeColor: const Color(0xFF2209B4),
+                onChanged: (value) => setState(() => notifications = value),
+              ),
+            ),
+
+            // 🌍 Language
+            _buildSettingTile(
+              icon: Icons.language,
+              color: Colors.deepPurple.shade100,
+              title: "Language",
+              subtitle: "Selected: $selectedLanguage",
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.grey,
+                size: 18,
+              ),
+              onTap: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LanguageScreen()),
+                );
+
+                if (result != null && result is String) {
+                  setState(() => selectedLanguage = result);
+                }
+              },
+            ),
+
+            // ℹ️ About App
+            _buildSettingTile(
+              icon: Icons.info_outline,
+              color: Colors.blue.shade100,
+              title: "About App",
+              subtitle: "App information",
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.grey,
+                size: 18,
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AboutAppScreen()),
+                );
+              },
+            ),
+
+            const SizedBox(height: 30), // space after About App section
+            // 🟦 Bigger Blue Circle with Image
+            Stack(
+              alignment: Alignment.center,
               children: [
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: const Icon(
-                    Icons.arrow_back,
-                    color: Colors.white,
-                    size: 26,
+                Container(
+                  width: 90, // bigger circle
+                  height: 90,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFF2209B4),
                   ),
                 ),
-                const SizedBox(width: 10),
-                const Text(
-                  "Settings",
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 20,
-                  ),
+                Image.asset(
+                  'assets/images/Group.png', // your image path
+                  width: 40, // bigger image
+                  height: 50,
+                  fit: BoxFit.cover,
                 ),
               ],
             ),
-          ),
 
-          const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-          // ⚫ Dark Mode
-          _buildSettingTile(
-            icon: Icons.dark_mode,
-            color: Colors.blue.shade100,
-            title: "Dark Mode",
-            subtitle: "Switch to dark mode",
-            trailing: Switch(
-              value: darkMode,
-              activeColor: const Color(0xFF2209B4),
-              onChanged: (value) => setState(() => darkMode = value),
-            ),
-          ),
-
-          // 🔔 Notifications
-          _buildSettingTile(
-            icon: Icons.notifications_active,
-            color: Colors.blue.shade200,
-            title: "Notifications",
-            subtitle: "Enable push notifications",
-            trailing: Switch(
-              value: notifications,
-              activeColor: const Color(0xFF2209B4),
-              onChanged: (value) => setState(() => notifications = value),
-            ),
-          ),
-
-          // 🌍 Language
-          _buildSettingTile(
-            icon: Icons.language,
-            color: Colors.deepPurple.shade100,
-            title: "Language",
-            subtitle: "Selected: $selectedLanguage",
-            trailing: const Icon(
-              Icons.arrow_forward_ios,
-              color: Colors.grey,
-              size: 18,
-            ),
-            onTap: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const LanguageScreen()),
-              );
-
-              if (result != null && result is String) {
-                setState(() => selectedLanguage = result);
-              }
-            },
-          ),
-
-          // ℹ️ About App
-          _buildSettingTile(
-            icon: Icons.info_outline,
-            color: Colors.blue.shade100,
-            title: "About App",
-            subtitle: "App information",
-            trailing: const Icon(
-              Icons.arrow_forward_ios,
-              color: Colors.grey,
-              size: 18,
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AboutAppScreen()),
-              );
-            },
-          ),
-
-          const SizedBox(height: 30),
-
-          // 📱 App Info (Keep this area as it is)
-          const Text(
-            "Crime Rate Alert",
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w600,
-              fontSize: 18,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            "Version 1.0.0",
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              color: Colors.grey,
-              fontSize: 13,
-            ),
-          ),
-          const SizedBox(height: 6),
-          const Text(
-            "Stay Informed, Stay Safe",
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 13,
-              color: Colors.grey,
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // 🟦 Bigger Blue Circle with Image
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: 150, // increased size
-                height: 150, // increased size
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFF2209B4),
-                ),
+            // 📱 App Info Text
+            const Text(
+              "Crime Rate Alert",
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w600,
+                fontSize: 18,
+                color: Colors.black,
               ),
-              Image.asset(
-                'assets/images/Group.png', // 👈 your image path
-                width: 95,
-                height: 95,
-                fit: BoxFit.cover,
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              "Version 1.0.0",
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                color: Colors.grey,
+                fontSize: 13,
               ),
-            ],
-          ),
-        ],
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              "Stay Informed, Stay Safe", // full text in Poppins
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 13,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }
