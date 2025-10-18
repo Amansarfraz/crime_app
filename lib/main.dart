@@ -1,4 +1,4 @@
-import 'package:crime_app/screens/crime_alerts_screen.dart' hide HomeScreen;
+import 'package:crime_app/screens/crime_alerts_screen.dart';
 import 'package:crime_app/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/splash_screen.dart';
