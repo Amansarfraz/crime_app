@@ -60,7 +60,25 @@ class AboutAppScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // 🟦 Blue Circle with Image (90x90)
+            // 📄 English description text
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                "Crime Rate Alert helps you stay informed about safety concerns in your area. "
+                "Get real-time alerts, explore crime statistics, and make smart safety decisions.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  color: Colors.grey.shade700,
+                  fontSize: 14.5,
+                  height: 1.4,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // 🟦 Blue Circle with Image (90x90 circle)
             Column(
               children: [
                 Container(
@@ -70,7 +88,7 @@ class AboutAppScreen extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: Color(0xFF2209B4),
                   ),
-                  child: ClipOval(
+                  child: Center(
                     child: Image.asset(
                       'assets/images/Group.png', // 👈 your image path
                       width: 40,
@@ -99,25 +117,6 @@ class AboutAppScreen extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-
-            const SizedBox(height: 20),
-
-            // 💬 App Description
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                "Crime Rate Alert helps you stay informed about safety concerns in your area. "
-                "Get real-time alerts, explore crime statistics, and make smart safety decisions. "
-                "Stay informed, stay safe.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  color: Colors.grey.shade700,
-                  fontSize: 14.5,
-                  height: 1.4,
-                ),
-              ),
             ),
 
             const SizedBox(height: 30),
