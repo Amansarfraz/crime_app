@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'dart:math';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class CrimeAlertsScreen extends StatelessWidget {
   final String city;
@@ -83,7 +84,6 @@ class CrimeAlertsScreen extends StatelessWidget {
           ),
         ],
       ),
-
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1,
         selectedItemColor: const Color(0xFF3F51B5),
@@ -99,7 +99,6 @@ class CrimeAlertsScreen extends StatelessWidget {
           ),
         ],
       ),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -116,7 +115,6 @@ class CrimeAlertsScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -220,7 +218,6 @@ class CrimeAlertsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-
             const Text(
               'Quick Actions',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -244,13 +241,11 @@ class CrimeAlertsScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-
             const Text(
               'Recent Searches',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
-
             if (recentSearches.isEmpty)
               const Text(
                 'No recent searches yet.',
@@ -271,7 +266,6 @@ class CrimeAlertsScreen extends StatelessWidget {
                 }).toList(),
               ),
             const SizedBox(height: 20),
-
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -369,10 +363,9 @@ class CrimeAlertsScreen extends StatelessWidget {
     );
   }
 
-  // ===== Search Dialog with Navigation =====
+  // ===== Search Dialog with API =====
   void _showSearchDialog(BuildContext context) {
     final controller = TextEditingController();
-    final random = Random();
 
     showDialog(
       context: context,
@@ -391,21 +384,18 @@ class CrimeAlertsScreen extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final query = controller.text.trim();
               if (query.isNotEmpty) {
                 Navigator.pop(context);
-                final randomLevel = [
-                  'High',
-                  'Medium',
-                  'Low',
-                ][random.nextInt(3)];
+                String crimeLevel = await fetchCrimeLevel(query);
+
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                     builder: (_) => CrimeAlertsScreen(
                       city: query,
-                      crimeLevel: randomLevel,
+                      crimeLevel: crimeLevel,
                       recentSearches: [
                         {
                           'city': city,
@@ -424,6 +414,25 @@ class CrimeAlertsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // ===== API Call Function =====
+  Future<String> fetchCrimeLevel(String city) async {
+    try {
+      // Replace with your actual API endpoint
+      final url = Uri.parse('http://127.0.0.1:9106/getCrime?city=$city');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['crimeLevel'] ?? 'Low';
+      } else {
+        return 'Low';
+      }
+    } catch (e) {
+      print('API Error: $e');
+      return 'Low';
+    }
   }
 
   // ===== Recent Search Widget =====
