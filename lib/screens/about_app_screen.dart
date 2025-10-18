@@ -43,6 +43,12 @@ class AboutAppScreen extends StatelessWidget {
 
             // 🔹 Animation Container (replace with your animation)
             Container(
+              width: 180,
+              height: 180,
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(20),
+              ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: Image.asset(
