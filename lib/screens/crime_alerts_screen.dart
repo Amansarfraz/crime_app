@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+
+import 'home_screen.dart'; // Make sure you have your HomeScreen imported
 
 class CrimeAlertsScreen extends StatelessWidget {
   final String city;
@@ -229,12 +229,15 @@ class CrimeAlertsScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _quickAction(
-                  context,
-                  Icons.search,
-                  'Search',
-                  () => _showSearchDialog(context),
-                ),
+                _quickAction(context, Icons.search, 'Search', () {
+                  // Quick Search opens Home screen instead of alert dialog
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const HomeScreen(), // <-- your HomeScreen
+                    ),
+                  );
+                }),
                 _quickAction(
                   context,
                   Icons.phone,
@@ -368,82 +371,6 @@ class CrimeAlertsScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  // Search Dialog with real API call
-  void _showSearchDialog(BuildContext context) {
-    final controller = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Search City'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            hintText: 'Enter city name...',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final query = controller.text.trim();
-              if (query.isNotEmpty) {
-                Navigator.pop(context);
-
-                // 🔹 Fetch real-time crime level
-                String crimeLevel = await fetchCrimeLevel(query);
-
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CrimeAlertsScreen(
-                      city: query,
-                      crimeLevel: crimeLevel,
-                      recentSearches: [
-                        {
-                          'city': city,
-                          'level': crimeLevel,
-                          'time': DateTime.now(),
-                        },
-                        ...recentSearches,
-                      ],
-                    ),
-                  ),
-                );
-              }
-            },
-            child: const Text('Search'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // API call function (Flutter Web compatible)
-  Future<String> fetchCrimeLevel(String city) async {
-    try {
-      // 🔹 Replace with your PC’s local IP where backend is running
-      final url = Uri.parse(
-        'https://api.jsonbin.io/v3/b/6718f0e2e41b4d34e4c9f82a/latest',
-      );
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['crimeLevel'] ?? 'Low';
-      } else {
-        return 'Low';
-      }
-    } catch (e) {
-      print('API Error: $e');
-      return 'Low';
-    }
   }
 
   // Recent Search Widget
