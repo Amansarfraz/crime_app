@@ -429,7 +429,9 @@ class CrimeAlertsScreen extends StatelessWidget {
   Future<String> fetchCrimeLevel(String city) async {
     try {
       // 🔹 Replace with your PC’s local IP where backend is running
-      final url = Uri.parse('http://192.168.1.100:9106/getCrime?city=$city');
+      final url = Uri.parse(
+        'https://api.jsonbin.io/v3/b/6718f0e2e41b4d34e4c9f82a/latest',
+      );
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
