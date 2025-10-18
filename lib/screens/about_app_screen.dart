@@ -41,7 +41,7 @@ class AboutAppScreen extends StatelessWidget {
 
             const SizedBox(height: 40),
 
-            // 🔹 Animation Placeholder (Replace with Lottie or any animation)
+            // 🔹 Animation Container (replace with your animation)
             Container(
               width: 180,
               height: 180,
@@ -49,14 +49,11 @@ class AboutAppScreen extends StatelessWidget {
                 color: Colors.blue.shade50,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Center(
-                child: Text(
-                  "Animation",
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    color: Colors.blue,
-                    fontSize: 18,
-                  ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset(
+                  'assets/images/police.png', // 👈 replace with your animation path
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
@@ -75,7 +72,7 @@ class AboutAppScreen extends StatelessWidget {
                   ),
                   child: ClipOval(
                     child: Image.asset(
-                      'assets/images/Group.png', // your image path
+                      'assets/images/Group.png', // 👈 your image path
                       width: 40,
                       height: 50,
                       fit: BoxFit.cover,
@@ -94,7 +91,7 @@ class AboutAppScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 const Text(
-                  "Stay Informed, Stay Safe",
+                  "Stay Safe, Stay Alert",
                   style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 14,
