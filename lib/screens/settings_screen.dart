@@ -157,7 +157,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 6),
             const Text(
-              "Version 1.0.0",
+              "Stay Informed, Stay Safe",
               style: TextStyle(
                 fontFamily: 'Poppins',
                 color: Colors.grey,
@@ -166,7 +166,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 6),
             const Text(
-              "Stay Informed, Stay Safe", // full text in Poppins
+              "Version 1.0.0 ", // full text in Poppins
               style: TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 13,

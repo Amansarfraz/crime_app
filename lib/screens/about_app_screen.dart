@@ -116,6 +116,15 @@ class AboutAppScreen extends StatelessWidget {
                     color: Colors.grey,
                   ),
                 ),
+                const SizedBox(height: 6),
+                const Text(
+                  "Version 1.0.0 ", // full text in Poppins
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 13,
+                    color: Colors.grey,
+                  ),
+                ),
               ],
             ),
 
