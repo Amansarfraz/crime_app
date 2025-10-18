@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'home_screen.dart'; // Make sure you have your HomeScreen imported
-
 class CrimeAlertsScreen extends StatelessWidget {
   final String city;
   final String crimeLevel;
@@ -77,12 +75,6 @@ class CrimeAlertsScreen extends StatelessWidget {
           'Crime Alerts',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.white),
-            onPressed: () {},
-          ),
-        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1,
@@ -229,12 +221,12 @@ class CrimeAlertsScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
+                // ✅ Search now just opens HomeScreen
                 _quickAction(context, Icons.search, 'Search', () {
-                  // Quick Search opens Home screen instead of alert dialog
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const HomeScreen(), // <-- your HomeScreen
+                      builder: (_) => const HomeScreen(), // <-- simple navigate
                     ),
                   );
                 }),
@@ -248,7 +240,7 @@ class CrimeAlertsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Recent Searches
+            // Recent Searches (unchanged)
             const Text(
               'Recent Searches',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -273,36 +265,12 @@ class CrimeAlertsScreen extends StatelessWidget {
                   );
                 }).toList(),
               ),
-            const SizedBox(height: 20),
-
-            // Info Box
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE3F2FD),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.info_outline, color: Color(0xFF3F51B5)),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Beginner Tip\nThis screen displays your last searched city result with safety recommendations. Search for different cities to get updated crime rate information.',
-                      style: TextStyle(color: Colors.black87),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  // Quick Action Widget
   Widget _quickAction(
     BuildContext context,
     IconData icon,
@@ -331,7 +299,6 @@ class CrimeAlertsScreen extends StatelessWidget {
     );
   }
 
-  // Emergency Sheet
   void _showEmergencySheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -373,7 +340,6 @@ class CrimeAlertsScreen extends StatelessWidget {
     );
   }
 
-  // Recent Search Widget
   Widget _recentSearch(String city, String level, String time, Color dotColor) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -411,6 +377,19 @@ class CrimeAlertsScreen extends StatelessWidget {
           Text(time, style: const TextStyle(color: Colors.grey)),
         ],
       ),
+    );
+  }
+}
+
+// Dummy HomeScreen for navigation
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Home Screen')),
+      body: const Center(child: Text('Welcome to Home Screen')),
     );
   }
 }
