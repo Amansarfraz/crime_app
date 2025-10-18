@@ -104,6 +104,7 @@ class CrimeAlertsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Last Search
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -218,6 +219,8 @@ class CrimeAlertsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
+
+            // Quick Actions
             const Text(
               'Quick Actions',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -241,6 +244,8 @@ class CrimeAlertsScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
+
+            // Recent Searches
             const Text(
               'Recent Searches',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -266,6 +271,8 @@ class CrimeAlertsScreen extends StatelessWidget {
                 }).toList(),
               ),
             const SizedBox(height: 20),
+
+            // Info Box
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -292,7 +299,7 @@ class CrimeAlertsScreen extends StatelessWidget {
     );
   }
 
-  // ===== Quick Action Widget =====
+  // Quick Action Widget
   Widget _quickAction(
     BuildContext context,
     IconData icon,
@@ -321,7 +328,7 @@ class CrimeAlertsScreen extends StatelessWidget {
     );
   }
 
-  // ===== Emergency Sheet =====
+  // Emergency Sheet
   void _showEmergencySheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -363,7 +370,7 @@ class CrimeAlertsScreen extends StatelessWidget {
     );
   }
 
-  // ===== Search Dialog with API =====
+  // Search Dialog with real API call
   void _showSearchDialog(BuildContext context) {
     final controller = TextEditingController();
 
@@ -388,6 +395,8 @@ class CrimeAlertsScreen extends StatelessWidget {
               final query = controller.text.trim();
               if (query.isNotEmpty) {
                 Navigator.pop(context);
+
+                // 🔹 Fetch real-time crime level
                 String crimeLevel = await fetchCrimeLevel(query);
 
                 Navigator.pushReplacement(
@@ -416,11 +425,11 @@ class CrimeAlertsScreen extends StatelessWidget {
     );
   }
 
-  // ===== API Call Function =====
+  // API call function (Flutter Web compatible)
   Future<String> fetchCrimeLevel(String city) async {
     try {
-      // Replace with your actual API endpoint
-      final url = Uri.parse('http://127.0.0.1:9106/getCrime?city=$city');
+      // 🔹 Replace with your PC’s local IP where backend is running
+      final url = Uri.parse('http://192.168.1.100:9106/getCrime?city=$city');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -435,7 +444,7 @@ class CrimeAlertsScreen extends StatelessWidget {
     }
   }
 
-  // ===== Recent Search Widget =====
+  // Recent Search Widget
   Widget _recentSearch(String city, String level, String time, Color dotColor) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
