@@ -1,7 +1,7 @@
-import 'package:crime_app/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
+import 'log_in_screen.dart';
 
 void main() {
   runApp(const CrimeRateApp());
@@ -104,7 +104,7 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const HomeScreen(),
+                            builder: (context) => const SigninScreen(),
                           ),
                         ); // 👉 Add your navigation here
                       },

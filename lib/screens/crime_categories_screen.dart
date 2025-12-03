@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'crime_detail_screen.dart';
 
-class CrimeCategoriesScreen extends StatelessWidget {
+class CrimeCategoriesScreen extends StatefulWidget {
   const CrimeCategoriesScreen({super.key});
 
-  // embedded sample PK dataset (same style as HomeScreen)
+  @override
+  State<CrimeCategoriesScreen> createState() => _CrimeCategoriesScreenState();
+}
+
+class _CrimeCategoriesScreenState extends State<CrimeCategoriesScreen> {
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _isListening = false;
+
+  // Embedded sample dataset
   static const Map<String, Map<String, dynamic>> pkCityStats = {
     'lahore': {
       'population': 11126285,
@@ -53,7 +62,6 @@ class CrimeCategoriesScreen extends StatelessWidget {
     },
   };
 
-  // Helper: return stats map for given city (fallback generator if not in pkCityStats)
   Map<String, dynamic> _getStats(String city) {
     final key = city.toLowerCase();
     if (pkCityStats.containsKey(key)) {
@@ -74,9 +82,25 @@ class CrimeCategoriesScreen extends StatelessWidget {
     }
   }
 
+  Future<void> _listen(TextEditingController controller) async {
+    if (!_isListening) {
+      bool available = await _speech.initialize();
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) {
+            controller.text = val.recognizedWords;
+          },
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // include 'key' for each crime so we can pass machine key to detail screen
     final List<Map<String, dynamic>> crimes = [
       {
         'title': 'Theft',
@@ -140,7 +164,6 @@ class CrimeCategoriesScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // Top Blue Bar
           Container(
             height: 80,
             width: double.infinity,
@@ -162,9 +185,7 @@ class CrimeCategoriesScreen extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(height: 20),
-
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -187,7 +208,6 @@ class CrimeCategoriesScreen extends StatelessWidget {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Left icon box
                               Container(
                                 margin: const EdgeInsets.all(16),
                                 width: 70,
@@ -208,8 +228,6 @@ class CrimeCategoriesScreen extends StatelessWidget {
                                   size: 40,
                                 ),
                               ),
-
-                              // Text section
                               Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.only(
@@ -244,8 +262,6 @@ class CrimeCategoriesScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-
-                          // Arrow button (bottom-right) — opens dialog to ask city and then navigates
                           Positioned(
                             right: 8,
                             bottom: 8,
@@ -256,7 +272,6 @@ class CrimeCategoriesScreen extends StatelessWidget {
                                 size: 18,
                               ),
                               onPressed: () async {
-                                // Show dialog to get city name from user
                                 final city = await showDialog<String?>(
                                   context: context,
                                   builder: (context) {
@@ -269,14 +284,30 @@ class CrimeCategoriesScreen extends StatelessWidget {
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      content: TextField(
-                                        controller: _cityCtrl,
-                                        decoration: InputDecoration(
-                                          hintText: 'e.g. Karachi, Lahore',
-                                          hintStyle: GoogleFonts.poppins(
-                                            fontSize: 14,
+                                      content: Row(
+                                        children: [
+                                          Expanded(
+                                            child: TextField(
+                                              controller: _cityCtrl,
+                                              decoration: InputDecoration(
+                                                hintText:
+                                                    'e.g. Karachi, Lahore',
+                                                hintStyle: GoogleFonts.poppins(
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
                                           ),
-                                        ),
+                                          IconButton(
+                                            icon: Icon(
+                                              _isListening
+                                                  ? Icons.mic
+                                                  : Icons.mic_none,
+                                              color: const Color(0xFF2209B4),
+                                            ),
+                                            onPressed: () => _listen(_cityCtrl),
+                                          ),
+                                        ],
                                       ),
                                       actions: [
                                         TextButton(
@@ -290,8 +321,7 @@ class CrimeCategoriesScreen extends StatelessWidget {
                                         ElevatedButton(
                                           onPressed: () {
                                             final txt = _cityCtrl.text.trim();
-                                            if (txt.isEmpty)
-                                              return; // don't close if empty
+                                            if (txt.isEmpty) return;
                                             Navigator.pop(context, txt);
                                           },
                                           style: ElevatedButton.styleFrom(
@@ -310,12 +340,10 @@ class CrimeCategoriesScreen extends StatelessWidget {
                                 );
 
                                 if (city != null && city.isNotEmpty) {
-                                  // compute local stats for this city
                                   final stats = _getStats(city);
                                   final key = crime['key'] as String;
                                   final localCount = (stats[key] ?? 0) as int;
 
-                                  // Navigate to CrimeDetailScreen and pass dynamic values
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(

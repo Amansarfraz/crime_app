@@ -6,6 +6,8 @@ import 'package:crime_app/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'stats_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,6 +20,15 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _controller = TextEditingController();
   String? _crimeLevel;
   List<Map<String, dynamic>> recentSearches = [];
+
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
 
   Future<void> fetchCrimeRate(String city) async {
     if (city.isEmpty) return;
@@ -74,6 +85,33 @@ class _HomeScreenState extends State<HomeScreen> {
         'time': DateTime.now(),
       });
     });
+  }
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) => debugPrint('Status: $val'),
+        onError: (val) => debugPrint('Error: $val'),
+      );
+
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) async {
+            setState(() {
+              _controller.text = val.recognizedWords;
+            });
+            if (val.finalResult && _controller.text.isNotEmpty) {
+              setState(() => _isListening = false);
+              await fetchCrimeRate(_controller.text);
+            }
+          },
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
   }
 
   Color getLevelColor(String level) {
@@ -199,6 +237,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                             ),
+                            GestureDetector(
+                              onTap: _listen,
+                              child: Icon(
+                                _isListening ? Icons.mic : Icons.mic_none,
+                                color: _isListening ? Colors.red : Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
                           ],
                         ),
                       ),
@@ -209,18 +255,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: ElevatedButton(
                         onPressed: () async {
                           await fetchCrimeRate(_controller.text);
-                          if (_crimeLevel != null) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => CrimeAlertsScreen(
-                            //       city: _controller.text,
-                            //       crimeLevel: _crimeLevel!,
-                            //       recentSearches: recentSearches,
-                            //     ),
-                            //   ),
-                            // );
-                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2209B4),
@@ -292,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 20),
 
-              // ⚡ Quick Access Row 1
+              // ⚡ Quick Access
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
@@ -332,6 +366,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
+
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -340,7 +375,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        // 👉 Navigate to Safety Tips Screen
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -352,7 +386,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        // 👉 Navigate to Settings Screen
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -366,7 +399,33 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
+
+              // ✅ Fixed Graph Section (missing closing bracket added)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        if (_controller.text.isNotEmpty) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  StatsScreen(recentSearches: recentSearches),
+                            ),
+                          );
+                        }
+                      },
+                      child: buildQuickBox("Graph", Icons.bar_chart),
+                    ),
+                  ],
+                ),
+              ), // 👈 this was missing
+
+              const SizedBox(height: 20),
 
               // 🕓 Recent Searches
               Padding(

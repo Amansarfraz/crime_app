@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'language_screen.dart';
 import 'about_app_screen.dart';
+import 'logout_screen.dart'; // 👈 new screen import
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -121,13 +122,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
 
-            const SizedBox(height: 30), // space after About App section
-            // 🟦 Bigger Blue Circle with Image
+            // 🚪 Logout Option (new)
+            _buildSettingTile(
+              icon: Icons.logout,
+              color: Colors.red.shade100,
+              title: "Logout",
+              subtitle: "Sign out from your account",
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.grey,
+                size: 18,
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LogoutScreen()),
+                );
+              },
+            ),
+
+            const SizedBox(height: 30),
+
+            // 🟦 App Logo Section
             Stack(
               alignment: Alignment.center,
               children: [
                 Container(
-                  width: 90, // bigger circle
+                  width: 90,
                   height: 90,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
@@ -135,8 +156,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 Image.asset(
-                  'assets/images/Group.png', // your image path
-                  width: 40, // bigger image
+                  'assets/images/Group.png',
+                  width: 40,
                   height: 50,
                   fit: BoxFit.cover,
                 ),
@@ -145,7 +166,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             const SizedBox(height: 20),
 
-            // 📱 App Info Text
             const Text(
               "Crime Rate Alert",
               style: TextStyle(
@@ -166,7 +186,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 6),
             const Text(
-              "Version 1.0.0 ", // full text in Poppins
+              "Version 1.0.0",
               style: TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 13,
