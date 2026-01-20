@@ -1,15 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'signup_screen.dart'; // for navigation if needed
+import 'home_screen.dart';
+import '../services/api_service.dart';
+//import '../services/storage_service.dart';
 
-class SigninScreen extends StatelessWidget {
-  const SigninScreen({super.key});
+class LogInScreen extends StatefulWidget {
+  const LogInScreen({super.key});
+
+  @override
+  State<LogInScreen> createState() => _LogInScreenState();
+}
+
+class _LogInScreenState extends State<LogInScreen> {
+  final TextEditingController emailCtrl = TextEditingController();
+  final TextEditingController passCtrl = TextEditingController();
+
+  bool isLoading = false;
+
+  @override
+  void dispose() {
+    emailCtrl.dispose();
+    passCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController emailCtrl = TextEditingController();
-    final TextEditingController passCtrl = TextEditingController();
-
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -27,17 +43,9 @@ class SigninScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // 🔙 Back Arrow
                 const SizedBox(height: 20),
-
-                // 🔔 App Logo
-                Image.asset(
-                  'assets/images/Group.png', // <-- apna path yahan do
-                  height: 100,
-                ),
+                Image.asset('assets/images/Group.png', height: 100),
                 const SizedBox(height: 25),
-
-                // 🏷 Title
                 Text(
                   "Sign In to Crime Alert",
                   style: GoogleFonts.poppins(
@@ -48,80 +56,50 @@ class SigninScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 40),
 
-                // 📧 Email Field
+                // Email
                 TextField(
                   controller: emailCtrl,
                   style: const TextStyle(color: Colors.black),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.8),
-                    hintText: 'Email',
-                    hintStyle: const TextStyle(color: Colors.black54),
-                    prefixIcon: const Icon(
-                      Icons.email_outlined,
-                      color: Colors.black,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(40),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
+                  decoration: _inputDecoration('Email', Icons.email_outlined),
                 ),
                 const SizedBox(height: 20),
 
-                // 🔒 Password Field
+                // Password
                 TextField(
                   controller: passCtrl,
                   obscureText: true,
                   style: const TextStyle(color: Colors.black),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.8),
-                    hintText: 'Password',
-                    hintStyle: const TextStyle(color: Colors.black54),
-                    prefixIcon: const Icon(
-                      Icons.lock_outline,
-                      color: Colors.black,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(40),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
+                  decoration: _inputDecoration('Password', Icons.lock_outline),
                 ),
                 const SizedBox(height: 25),
 
-                // 🚪 Sign In Button
+                // Sign In Button
                 SizedBox(
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // TODO: Add your login logic here
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const SignupScreen()),
-                      );
-                    },
+                    onPressed: isLoading ? null : _handleLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white.withOpacity(0.8),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(40),
                       ),
                     ),
-                    child: Text(
-                      "Sign In",
-                      style: GoogleFonts.poppins(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 18,
-                      ),
-                    ),
+                    child: isLoading
+                        ? const CircularProgressIndicator(color: Colors.black)
+                        : Text(
+                            "Sign In",
+                            style: GoogleFonts.poppins(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18,
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 25),
 
-                // 🧾 Sign Up link
+                // Go to Signup
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -131,10 +109,10 @@ class SigninScreen extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const SignupScreen(),
+                            builder: (_) => const LogInScreen(),
                           ),
                         );
                       },
@@ -149,8 +127,6 @@ class SigninScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 60),
-
-                // 🧠 Bottom Tagline
                 Text(
                   "Stay Alert, Stay Safe 🔒",
                   style: GoogleFonts.poppins(
@@ -165,5 +141,45 @@ class SigninScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // ---------- Input Decoration ----------
+  InputDecoration _inputDecoration(String hint, IconData icon) {
+    return InputDecoration(
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.8),
+      hintText: hint,
+      hintStyle: const TextStyle(color: Colors.black54),
+      prefixIcon: Icon(icon, color: Colors.black),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(40),
+        borderSide: BorderSide.none,
+      ),
+    );
+  }
+
+  // ---------- Login Handler ----------
+  void _handleLogin() async {
+    setState(() => isLoading = true);
+
+    final api = ApiService();
+    try {
+      bool success = await api.login(
+        emailCtrl.text.trim(),
+        passCtrl.text.trim(),
+      );
+      if (success) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Login failed: $e")));
+    }
+
+    setState(() => isLoading = false);
   }
 }

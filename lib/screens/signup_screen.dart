@@ -1,9 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'home_screen.dart';
 
-class SignupScreen extends StatelessWidget {
+import '../services/api_service.dart';
+//import '../services/storage_service.dart';
+import 'log_in_screen.dart';
+
+class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
+
+  @override
+  State<SignupScreen> createState() => _SignupScreenState();
+}
+
+class _SignupScreenState extends State<SignupScreen> {
+  final TextEditingController nameCtrl = TextEditingController();
+  final TextEditingController emailCtrl = TextEditingController();
+  final TextEditingController passCtrl = TextEditingController();
+
+  bool isLoading = false;
+
+  @override
+  void dispose() {
+    nameCtrl.dispose();
+    emailCtrl.dispose();
+    passCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,13 +35,9 @@ class SignupScreen extends StatelessWidget {
         height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
+            colors: [Color(0xFF3B16BD), Color(0xFF1B0A57)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF3B16BD), // top (0%)
-              Color(0xFF1B0A57), // bottom (60%)
-            ],
-            stops: [0.0, 0.6],
           ),
         ),
         child: SafeArea(
@@ -29,15 +47,8 @@ class SignupScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 10),
-
-                // 🔔 App Logo
-                Image.asset(
-                  'assets/images/Group.png', // your icon path
-                  height: 100,
-                ),
+                Image.asset('assets/images/Group.png', height: 100),
                 const SizedBox(height: 20),
-
-                // 🏷 Title
                 Text(
                   'Create Account',
                   style: GoogleFonts.poppins(
@@ -48,86 +59,29 @@ class SignupScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
 
-                // 👤 Full Name
+                // Name
                 TextField(
-                  style: const TextStyle(color: Colors.black),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.8),
-                    hintText: 'Full Name',
-                    hintStyle: const TextStyle(color: Colors.black54),
-                    prefixIcon: const Icon(Icons.person, color: Colors.black),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(40),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
+                  controller: nameCtrl,
+                  decoration: _inputDecoration('Full Name', Icons.person),
                 ),
                 const SizedBox(height: 15),
 
-                // 📧 Email
+                // Email
                 TextField(
-                  style: const TextStyle(color: Colors.black),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.8),
-                    hintText: 'Email',
-                    hintStyle: const TextStyle(color: Colors.black54),
-                    prefixIcon: const Icon(
-                      Icons.email_outlined,
-                      color: Colors.black,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(40),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
+                  controller: emailCtrl,
+                  decoration: _inputDecoration('Email', Icons.email_outlined),
                 ),
                 const SizedBox(height: 15),
 
-                // 🔒 Password
+                // Password
                 TextField(
+                  controller: passCtrl,
                   obscureText: true,
-                  style: const TextStyle(color: Colors.black),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.8),
-                    hintText: 'Password',
-                    hintStyle: const TextStyle(color: Colors.black54),
-                    prefixIcon: const Icon(
-                      Icons.lock_outline,
-                      color: Colors.black,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(40),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 15),
-
-                // 🔁 Confirm Password
-                TextField(
-                  obscureText: true,
-                  style: const TextStyle(color: Colors.black),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.8),
-                    hintText: 'Confirm Password',
-                    hintStyle: const TextStyle(color: Colors.black54),
-                    prefixIcon: const Icon(
-                      Icons.lock_reset,
-                      color: Colors.black,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(40),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
+                  decoration: _inputDecoration('Password', Icons.lock_outline),
                 ),
                 const SizedBox(height: 30),
 
-                // 🧾 Create Account Button
+                // Create Account Button
                 SizedBox(
                   width: double.infinity,
                   height: 55,
@@ -138,25 +92,57 @@ class SignupScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(40),
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const HomeScreen()),
-                      );
-                    },
-                    child: Text(
-                      'Create Account',
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                            setState(() => isLoading = true);
+
+                            try {
+                              final api = ApiService();
+
+                              // ✅ Signup returns bool now
+                              bool success = await api.signup(
+                                nameCtrl.text.trim(),
+                                emailCtrl.text.trim(),
+                                passCtrl.text.trim(),
+                              );
+
+                              if (success) {
+                                // ✅ Go to Login screen
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Signup successful"),
+                                  ),
+                                );
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const LogInScreen(),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("Signup failed: $e")),
+                              );
+                            }
+
+                            setState(() => isLoading = false);
+                          },
+                    child: isLoading
+                        ? const CircularProgressIndicator(color: Colors.black)
+                        : Text(
+                            'Create Account',
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                   ),
                 ),
-                const SizedBox(height: 20),
 
-                // 🔗 Go to Login
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -165,7 +151,14 @@ class SignupScreen extends StatelessWidget {
                       style: GoogleFonts.poppins(color: Colors.white),
                     ),
                     GestureDetector(
-                      onTap: () => Navigator.pushNamed(context, '/login'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LogInScreen(),
+                          ),
+                        );
+                      },
                       child: Text(
                         'Login',
                         style: GoogleFonts.poppins(
@@ -176,9 +169,8 @@ class SignupScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 50),
 
-                // 🧠 Bottom Tagline
+                const SizedBox(height: 50),
                 Text(
                   'Stay Alert, Stay Safe 🔒',
                   style: GoogleFonts.poppins(
@@ -191,6 +183,21 @@ class SignupScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // ---------- Reusable Input Decoration ----------
+  InputDecoration _inputDecoration(String hint, IconData icon) {
+    return InputDecoration(
+      filled: true,
+      fillColor: Colors.white.withOpacity(0.8),
+      hintText: hint,
+      hintStyle: const TextStyle(color: Colors.black54),
+      prefixIcon: Icon(icon, color: Colors.black),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(40),
+        borderSide: BorderSide.none,
       ),
     );
   }

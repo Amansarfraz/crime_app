@@ -197,3 +197,373 @@ class _CrimeDetailScreenState extends State<CrimeDetailScreen> {
     );
   }
 }
+
+// import 'package:flutter/material.dart';
+// import 'package:google_fonts/google_fonts.dart';
+// import '../services/api_service.dart';
+
+// class CrimeDetailScreen extends StatefulWidget {
+//   final String cityName;
+//   final String crimeTitle;
+//   final String crimeKey;
+//   final int localCount;
+
+//   const CrimeDetailScreen({
+//     super.key,
+//     required this.cityName,
+//     required this.crimeTitle,
+//     required this.crimeKey,
+//     required this.localCount,
+//   });
+
+//   @override
+//   State<CrimeDetailScreen> createState() => _CrimeDetailScreenState();
+// }
+
+// class _CrimeDetailScreenState extends State<CrimeDetailScreen> {
+//   final ApiService api = ApiService();
+
+//   bool isLoading = true;
+//   String? error;
+
+//   int incidentsCount = 0;
+//   int severityIndex = 0;
+//   List<String> safetyTips = [];
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _loadCrimeDetail();
+//   }
+
+//   Future<void> _loadCrimeDetail() async {
+//     try {
+//       final data = await api.getCrimeDetail(
+//         city: widget.cityName,
+//         category: widget.crimeKey,
+//       );
+
+//       setState(() {
+//         incidentsCount = data["incidents_count"] ?? 0;
+//         severityIndex = data["severity_index"] ?? 0;
+//         safetyTips = List<String>.from(data["safety_tips"] ?? []);
+//         isLoading = false;
+//       });
+//     } catch (e) {
+//       setState(() {
+//         error = e.toString();
+//         isLoading = false;
+//       });
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Colors.white,
+//       appBar: AppBar(
+//         backgroundColor: const Color(0xFF2209B4),
+//         title: Text(
+//           "${widget.crimeTitle} in ${widget.cityName}",
+//           style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+//         ),
+//       ),
+//       body: Padding(
+//         padding: const EdgeInsets.all(20),
+//         child: isLoading
+//             ? const Center(child: CircularProgressIndicator())
+//             : error != null
+//             ? Center(
+//                 child: Text(
+//                   error!,
+//                   style: GoogleFonts.poppins(color: Colors.red),
+//                 ),
+//               )
+//             : Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   // 🏙 City & Crime Summary
+//                   Container(
+//                     width: double.infinity,
+//                     padding: const EdgeInsets.all(20),
+//                     decoration: BoxDecoration(
+//                       color: const Color(0xFFE8E9FF),
+//                       borderRadius: BorderRadius.circular(15),
+//                     ),
+//                     child: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         Text(
+//                           "City: ${widget.cityName}",
+//                           style: GoogleFonts.poppins(
+//                             fontSize: 18,
+//                             fontWeight: FontWeight.w600,
+//                           ),
+//                         ),
+//                         const SizedBox(height: 8),
+//                         Text(
+//                           "Crime Type: ${widget.crimeTitle}",
+//                           style: GoogleFonts.poppins(fontSize: 18),
+//                         ),
+//                         const SizedBox(height: 8),
+//                         Text(
+//                           "Reported Incidents: $incidentsCount",
+//                           style: GoogleFonts.poppins(
+//                             fontSize: 18,
+//                             color: Colors.redAccent,
+//                             fontWeight: FontWeight.w600,
+//                           ),
+//                         ),
+//                         const SizedBox(height: 8),
+//                         Text(
+//                           "Crime Severity Index: $severityIndex%",
+//                           style: GoogleFonts.poppins(
+//                             fontSize: 18,
+//                             color: Colors.deepOrange,
+//                             fontWeight: FontWeight.w600,
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+
+//                   const SizedBox(height: 25),
+
+//                   // 💡 Safety Tips
+//                   Text(
+//                     "Safety Tips:",
+//                     style: GoogleFonts.poppins(
+//                       fontSize: 20,
+//                       fontWeight: FontWeight.bold,
+//                       color: const Color(0xFF2209B4),
+//                     ),
+//                   ),
+//                   const SizedBox(height: 10),
+
+//                   Expanded(
+//                     child: safetyTips.isEmpty
+//                         ? Center(
+//                             child: Text(
+//                               "No safety tips available.",
+//                               style: GoogleFonts.poppins(),
+//                             ),
+//                           )
+//                         : ListView.builder(
+//                             itemCount: safetyTips.length,
+//                             itemBuilder: (context, index) {
+//                               return Card(
+//                                 elevation: 2,
+//                                 margin: const EdgeInsets.symmetric(vertical: 6),
+//                                 shape: RoundedRectangleBorder(
+//                                   borderRadius: BorderRadius.circular(10),
+//                                 ),
+//                                 child: ListTile(
+//                                   leading: const Icon(
+//                                     Icons.check_circle_outline,
+//                                     color: Colors.green,
+//                                   ),
+//                                   title: Text(
+//                                     safetyTips[index],
+//                                     style: GoogleFonts.poppins(fontSize: 16),
+//                                   ),
+//                                 ),
+//                               );
+//                             },
+//                           ),
+//                   ),
+//                 ],
+//               ),
+//       ),
+//     );
+//   }
+// }
+
+// import 'package:flutter/material.dart';
+// import 'package:google_fonts/google_fonts.dart';
+// import '../services/api_service.dart';
+
+// class CrimeDetailScreen extends StatefulWidget {
+//   final String cityName;
+//   final String crimeTitle;
+//   final String crimeKey;
+
+//   const CrimeDetailScreen({
+//     super.key,
+//     required this.cityName,
+//     required this.crimeTitle,
+//     required this.crimeKey,
+//   });
+
+//   @override
+//   State<CrimeDetailScreen> createState() => _CrimeDetailScreenState();
+// }
+
+// class _CrimeDetailScreenState extends State<CrimeDetailScreen> {
+//   final ApiService api = ApiService();
+
+//   bool isLoading = true;
+//   String? error;
+
+//   int incidentsCount = 0;
+//   int severityIndex = 0;
+//   int crimeRate = 0;
+//   List<String> safetyTips = [];
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _loadCrimeDetail();
+//   }
+
+//   Future<void> _loadCrimeDetail() async {
+//     try {
+//       // 🔹 POST call to backend for city & category
+//       final data = await api.getCrimeDetail(
+//         city: widget.cityName,
+//         category: widget.crimeKey,
+//       );
+
+//       setState(() {
+//         incidentsCount = data["incidents_count"] ?? 0;
+//         severityIndex = data["severity_index"] ?? 0;
+//         crimeRate = data["crime_rate"] ?? 0;
+//         safetyTips = List<String>.from(data["safety_tips"] ?? []);
+//         isLoading = false;
+//       });
+//     } catch (e) {
+//       setState(() {
+//         error = e.toString();
+//         isLoading = false;
+//       });
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: Colors.white,
+//       appBar: AppBar(
+//         backgroundColor: const Color(0xFF2209B4),
+//         title: Text(
+//           "${widget.crimeTitle} in ${widget.cityName}",
+//           style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+//         ),
+//       ),
+//       body: Padding(
+//         padding: const EdgeInsets.all(20),
+//         child: isLoading
+//             ? const Center(child: CircularProgressIndicator())
+//             : error != null
+//             ? Center(
+//                 child: Text(
+//                   error!,
+//                   style: GoogleFonts.poppins(color: Colors.red),
+//                 ),
+//               )
+//             : Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   // 🏙 City & Crime Summary
+//                   Container(
+//                     width: double.infinity,
+//                     padding: const EdgeInsets.all(20),
+//                     decoration: BoxDecoration(
+//                       color: const Color(0xFFE8E9FF),
+//                       borderRadius: BorderRadius.circular(15),
+//                     ),
+//                     child: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         Text(
+//                           "City: ${widget.cityName}",
+//                           style: GoogleFonts.poppins(
+//                             fontSize: 18,
+//                             fontWeight: FontWeight.w600,
+//                           ),
+//                         ),
+//                         const SizedBox(height: 8),
+//                         Text(
+//                           "Crime Type: ${widget.crimeTitle}",
+//                           style: GoogleFonts.poppins(fontSize: 18),
+//                         ),
+//                         const SizedBox(height: 8),
+//                         Text(
+//                           "Reported Incidents: $incidentsCount",
+//                           style: GoogleFonts.poppins(
+//                             fontSize: 18,
+//                             color: Colors.redAccent,
+//                             fontWeight: FontWeight.w600,
+//                           ),
+//                         ),
+//                         const SizedBox(height: 8),
+//                         Text(
+//                           "Crime Severity Index: $severityIndex%",
+//                           style: GoogleFonts.poppins(
+//                             fontSize: 18,
+//                             color: Colors.deepOrange,
+//                             fontWeight: FontWeight.w600,
+//                           ),
+//                         ),
+//                         const SizedBox(height: 8),
+//                         Text(
+//                           "Crime Rate: $crimeRate%",
+//                           style: GoogleFonts.poppins(
+//                             fontSize: 18,
+//                             color: Colors.blueAccent,
+//                             fontWeight: FontWeight.w600,
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+
+//                   const SizedBox(height: 25),
+
+//                   // 💡 Safety Tips
+//                   Text(
+//                     "Safety Tips:",
+//                     style: GoogleFonts.poppins(
+//                       fontSize: 20,
+//                       fontWeight: FontWeight.bold,
+//                       color: const Color(0xFF2209B4),
+//                     ),
+//                   ),
+//                   const SizedBox(height: 10),
+
+//                   Expanded(
+//                     child: safetyTips.isEmpty
+//                         ? Center(
+//                             child: Text(
+//                               "No safety tips available.",
+//                               style: GoogleFonts.poppins(),
+//                             ),
+//                           )
+//                         : ListView.builder(
+//                             itemCount: safetyTips.length,
+//                             itemBuilder: (context, index) {
+//                               return Card(
+//                                 elevation: 2,
+//                                 margin: const EdgeInsets.symmetric(vertical: 6),
+//                                 shape: RoundedRectangleBorder(
+//                                   borderRadius: BorderRadius.circular(10),
+//                                 ),
+//                                 child: ListTile(
+//                                   leading: const Icon(
+//                                     Icons.check_circle_outline,
+//                                     color: Colors.green,
+//                                   ),
+//                                   title: Text(
+//                                     safetyTips[index],
+//                                     style: GoogleFonts.poppins(fontSize: 16),
+//                                   ),
+//                                 ),
+//                               );
+//                             },
+//                           ),
+//                   ),
+//                 ],
+//               ),
+//       ),
+//     );
+//   }
+// }

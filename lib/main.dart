@@ -12,6 +12,7 @@ import 'screens/about_app_screen.dart';
 import 'screens/language_screen.dart';
 import 'screens/log_in_screen.dart';
 import 'screens/signup_screen.dart';
+//import 'services/api_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -48,11 +49,13 @@ class MyApp extends StatelessWidget {
         '/settings_screen': (context) => const SettingsScreen(),
         '/about_app_screen': (context) => const AboutAppScreen(),
         '/language_screen': (context) => const LanguageScreen(),
-        '/signin_screen': (context) => const SigninScreen(),
-        '/signup_screen': (context) => const SignupScreen(),
+        '/signin_screen': (context) => const LogInScreen(),
+        '/signup_screen': (context) => SignupScreen(),
 
         // ✅ Fixed: Stats screen with optional parameters
         '/stats_screen': (context) => const StatsScreen(),
+        '/login': (context) => LogInScreen(),
+        '/signup': (context) => SignupScreen(),
       },
 
       // ✅ Handle dynamic routes like CrimeDetailScreen here
