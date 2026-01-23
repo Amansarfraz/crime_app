@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../services/api_service.dart';
-//import '../services/storage_service.dart';
+import '../services/auth_service.dart'; // Firebase Auth
 import 'log_in_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -16,6 +15,8 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController nameCtrl = TextEditingController();
   final TextEditingController emailCtrl = TextEditingController();
   final TextEditingController passCtrl = TextEditingController();
+
+  final AuthService _authService = AuthService();
 
   bool isLoading = false;
 
@@ -98,22 +99,20 @@ class _SignupScreenState extends State<SignupScreen> {
                             setState(() => isLoading = true);
 
                             try {
-                              final api = ApiService();
-
-                              // ✅ Signup returns bool now
-                              bool success = await api.signup(
-                                nameCtrl.text.trim(),
-                                emailCtrl.text.trim(),
-                                passCtrl.text.trim(),
+                              // ✅ Firebase Auth Signup
+                              final user = await _authService.signUp(
+                                email: emailCtrl.text.trim(),
+                                password: passCtrl.text.trim(),
                               );
 
-                              if (success) {
-                                // ✅ Go to Login screen
+                              if (user != null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text("Signup successful"),
                                   ),
                                 );
+
+                                // Navigate to Login screen
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
@@ -121,6 +120,12 @@ class _SignupScreenState extends State<SignupScreen> {
                                   ),
                                 );
                               }
+                            } on FirebaseAuthException catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Signup failed: ${e.message}"),
+                                ),
+                              );
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text("Signup failed: $e")),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'home_screen.dart';
-import '../services/api_service.dart';
-//import '../services/storage_service.dart';
+import '../services/auth_service.dart'; // Firebase Auth
+// import '../services/storage_service.dart'; // optional if used
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LogInScreen extends StatefulWidget {
   const LogInScreen({super.key});
@@ -14,6 +15,8 @@ class LogInScreen extends StatefulWidget {
 class _LogInScreenState extends State<LogInScreen> {
   final TextEditingController emailCtrl = TextEditingController();
   final TextEditingController passCtrl = TextEditingController();
+
+  final AuthService _authService = AuthService();
 
   bool isLoading = false;
 
@@ -109,11 +112,9 @@ class _LogInScreenState extends State<LogInScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.pushReplacement(
+                        Navigator.pushReplacementNamed(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => const LogInScreen(),
-                          ),
+                          '/signup_screen',
                         );
                       },
                       child: Text(
@@ -162,18 +163,26 @@ class _LogInScreenState extends State<LogInScreen> {
   void _handleLogin() async {
     setState(() => isLoading = true);
 
-    final api = ApiService();
     try {
-      bool success = await api.login(
-        emailCtrl.text.trim(),
-        passCtrl.text.trim(),
+      final user = await _authService.login(
+        email: emailCtrl.text.trim(),
+        password: passCtrl.text.trim(),
       );
-      if (success) {
+
+      if (user != null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Login successful")));
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const HomeScreen()),
         );
       }
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Login failed: ${e.message}")));
     } catch (e) {
       ScaffoldMessenger.of(
         context,
