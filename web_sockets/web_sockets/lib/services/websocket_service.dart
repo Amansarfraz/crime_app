@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/html.dart';
 
 class WebSocketService {
   late WebSocketChannel channel;
 
   void connect(String userId) {
-    channel = WebSocketChannel.connect(
-      Uri.parse("ws://127.0.0.1:8000/ws/$userId"),
-    );
+    final url = "ws://localhost:8000/ws/$userId";
+
+    // ✅ HTML WebSocket for Flutter Web (Chrome / Edge)
+    channel = HtmlWebSocketChannel.connect(url);
   }
 
   Stream getStream() => channel.stream;

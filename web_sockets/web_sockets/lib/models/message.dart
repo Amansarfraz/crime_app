@@ -2,7 +2,7 @@ class Message {
   final String sender;
   final String recipient;
   final String text;
-  final DateTime ts; // backend field
+  final DateTime ts;
 
   Message({
     required this.sender,
@@ -18,14 +18,5 @@ class Message {
       text: json['text'],
       ts: DateTime.parse(json['ts']),
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      "sender": sender,
-      "recipient": recipient,
-      "text": text,
-      "ts": ts.toIso8601String(),
-    };
   }
 }

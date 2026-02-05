@@ -24,19 +24,13 @@ class MessageTile extends StatelessWidget {
               ? CrossAxisAlignment.end
               : CrossAxisAlignment.start,
           children: [
-            // Sender name
             Text(
               message.sender,
               style: TextStyle(fontSize: 12, color: Colors.black87),
             ),
             SizedBox(height: 5),
-
-            // Message text
             Text(message.text, style: TextStyle(fontSize: 15)),
-
             SizedBox(height: 4),
-
-            // Timestamp
             Text(
               message.ts.toLocal().toString(),
               style: TextStyle(fontSize: 10, color: Colors.black54),

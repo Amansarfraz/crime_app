@@ -10,13 +10,7 @@ class MyChatApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "FastAPI Chat",
-      theme: ThemeData(primarySwatch: Colors.blue),
-
-      home: ChatScreen(
-        currentUser: "Aman", // ✔ your user ID / username
-        otherUser: "Sara", // ✔ the person you are chatting with
-      ),
+      home: ChatScreen(currentUser: "Aman", otherUser: "Sara"),
     );
   }
 }

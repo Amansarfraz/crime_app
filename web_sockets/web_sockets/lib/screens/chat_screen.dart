@@ -5,44 +5,35 @@ import '../services/websocket_service.dart';
 import '../widgets/message_tile.dart';
 
 class ChatScreen extends StatefulWidget {
-  final String currentUser; // Logged-in user
-  final String otherUser; // Person you are chatting with
+  final String currentUser;
+  final String otherUser;
 
   ChatScreen({required this.currentUser, required this.otherUser, Key? key})
     : super(key: key);
 
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  State<ChatScreen> createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController msgController = TextEditingController();
+  final List<Message> messages = [];
   late WebSocketService ws;
-  List<Message> messages = [];
 
   @override
   void initState() {
     super.initState();
 
     ws = WebSocketService();
-
-    // Connect with current user ID
     ws.connect(widget.currentUser);
 
-    // Listen for incoming messages
     ws.getStream().listen((event) {
-      try {
-        final data = jsonDecode(event);
-        print("RAW WS EVENT: $data"); // Debug
+      final data = jsonDecode(event);
+      final msg = Message.fromJson(data);
 
-        final newMsg = Message.fromJson(data);
-
-        setState(() {
-          messages.add(newMsg);
-        });
-      } catch (e) {
-        print("Error parsing message: $e");
-      }
+      setState(() {
+        messages.add(msg);
+      });
     });
   }
 
@@ -85,14 +76,13 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: TextField(
                     controller: msgController,
                     decoration: InputDecoration(
-                      hintText: "Type a message...",
+                      hintText: "Type message...",
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(width: 8),
                 IconButton(
                   icon: Icon(Icons.send, color: Colors.blue),
                   onPressed: sendMessage,
