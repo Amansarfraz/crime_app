@@ -120,6 +120,7 @@ import 'screens/about_app_screen.dart';
 import 'screens/language_screen.dart';
 import 'screens/stats_screen.dart';
 import 'screens/crime_detail_screen.dart';
+import 'screens/crime_map_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -156,6 +157,7 @@ class MyApp extends StatelessWidget {
         '/about': (context) => const AboutAppScreen(),
         '/language': (context) => const LanguageScreen(),
         '/stats': (context) => const StatsScreen(),
+        '/crime_map': (context) => const CrimeMapScreen(),
       },
 
       onGenerateRoute: (settings) {

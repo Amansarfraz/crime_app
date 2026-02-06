@@ -1027,12 +1027,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
               const SizedBox(height: 20),
 
-              // Graph
+              // Graph + Map Row
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    // Graph Button
                     GestureDetector(
                       onTap: () {
                         if (_controller.text.isNotEmpty) {
@@ -1046,6 +1047,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
                       },
                       child: buildQuickBox("Graph", Icons.bar_chart),
+                    ),
+
+                    // Map Button
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/crime_map',
+                        ); // ✅ Navigate to map screen
+                      },
+                      child: buildQuickBox(
+                        "Map",
+                        Icons.map,
+                      ), // Same style as Graph
                     ),
                   ],
                 ),
