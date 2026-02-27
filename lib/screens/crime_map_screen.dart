@@ -3,10 +3,8 @@
 // import 'package:http/http.dart' as http;
 // import 'dart:convert';
 
-// // Example ApiService class, replace with real API call if you have backend
 // class ApiService {
 //   Future<Map<String, dynamic>> getCityCrimeLevel(String city) async {
-//     // Dummy data for demo
 //     Map<String, String> dummyData = {
 //       "Lahore": "high",
 //       "Karachi": "medium",
@@ -82,7 +80,6 @@
 //     setState(() => _loading = true);
 
 //     try {
-//       // 1️⃣ Get Location
 //       final location = await _getLatLngFromCity(city);
 //       if (location == null) {
 //         _showMsg("City not found!");
@@ -90,11 +87,9 @@
 //         return;
 //       }
 
-//       // 2️⃣ Get Crime Level
 //       final crimeData = await api.getCityCrimeLevel(city);
 //       final level = crimeData["crime_level"]?.toString() ?? "low";
 
-//       // 3️⃣ Create Marker
 //       final marker = Marker(
 //         markerId: MarkerId(city),
 //         position: location,
@@ -102,7 +97,6 @@
 //         infoWindow: InfoWindow(title: city, snippet: "Crime Level: $level"),
 //       );
 
-//       // 4️⃣ Update Map
 //       setState(() {
 //         _markers.clear();
 //         _markers.add(marker);
@@ -117,12 +111,10 @@
 //     setState(() => _loading = false);
 //   }
 
-//   // ================== MESSAGE ==================
 //   void _showMsg(String msg) {
 //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
 //   }
 
-//   // ================== UI ==================
 //   @override
 //   Widget build(BuildContext context) {
 //     return Scaffold(
@@ -133,7 +125,6 @@
 //       ),
 //       body: Column(
 //         children: [
-//           // 🔍 SEARCH BAR
 //           Container(
 //             margin: const EdgeInsets.all(12),
 //             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -169,7 +160,6 @@
 //               ],
 //             ),
 //           ),
-//           // 🗺 MAP
 //           Expanded(
 //             child: GoogleMap(
 //               initialCameraPosition: CameraPosition(
@@ -290,10 +280,12 @@ class _CrimeMapScreenState extends State<CrimeMapScreen> {
       );
 
       setState(() {
-        _markers.clear();
+        _markers
+            .clear(); // agar multiple markers chahiye to clear ko comment karein
         _markers.add(marker);
       });
 
+      // Zoom & animate map to city
       _mapController?.animateCamera(CameraUpdate.newLatLngZoom(location, 12));
     } catch (e) {
       _showMsg("Something went wrong!");
@@ -317,6 +309,7 @@ class _CrimeMapScreenState extends State<CrimeMapScreen> {
       ),
       body: Column(
         children: [
+          // ========== Search Box ==========
           Container(
             margin: const EdgeInsets.all(12),
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -352,6 +345,7 @@ class _CrimeMapScreenState extends State<CrimeMapScreen> {
               ],
             ),
           ),
+          // ========== Map ==========
           Expanded(
             child: GoogleMap(
               initialCameraPosition: CameraPosition(
