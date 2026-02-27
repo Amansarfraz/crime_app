@@ -179,30 +179,11 @@
 //     );
 //   }
 // }
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
-/// ================= API SERVICE =================
-class ApiService {
-  Future<Map<String, dynamic>> getCityCrimeLevel(String city) async {
-    Map<String, String> dummyData = {
-      "Lahore": "high",
-      "Karachi": "medium",
-      "Islamabad": "low",
-      "Peshawar": "high",
-      "Quetta": "medium",
-    };
-
-    await Future.delayed(const Duration(milliseconds: 400));
-
-    return {"crime_level": dummyData[city] ?? "low"};
-  }
-}
-
-/// ================= SCREEN =================
 class CrimeMapScreen extends StatefulWidget {
   const CrimeMapScreen({super.key});
 
@@ -211,24 +192,18 @@ class CrimeMapScreen extends StatefulWidget {
 }
 
 class _CrimeMapScreenState extends State<CrimeMapScreen> {
-  final ApiService api = ApiService();
-
-  GoogleMapController? _mapController;
   final TextEditingController _searchController = TextEditingController();
 
+  GoogleMapController? _mapController;
   final LatLng _defaultCenter = const LatLng(
     30.3753,
     69.3451,
-  ); // Pakistan Center
-
-  final Set<Marker> _markers = {};
-
+  ); // Pakistan center
   bool _loading = false;
 
-  String _currentCity = "";
-  String _currentCrimeLevel = "";
+  Set<Circle> _heatCircles = {};
 
-  /// ================= GET LAT LNG =================
+  /// ================== GET LAT LNG ==================
   Future<LatLng?> _getLatLngFromCity(String city) async {
     try {
       final url = Uri.parse(
@@ -242,7 +217,6 @@ class _CrimeMapScreenState extends State<CrimeMapScreen> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
         if (data.isNotEmpty) {
           return LatLng(
             double.parse(data[0]["lat"]),
@@ -256,73 +230,63 @@ class _CrimeMapScreenState extends State<CrimeMapScreen> {
     return null;
   }
 
-  /// ================= MARKER COLOR =================
-  BitmapDescriptor _getMarkerColor(String level) {
-    switch (level.toLowerCase()) {
-      case "high":
-        return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed);
+  /// ================== LOAD HEATMAP FROM BACKEND ==================
+  Future<void> _loadHeatmap(String city) async {
+    try {
+      final response = await http.get(
+        Uri.parse("http://10.0.2.2:8000/map/heatmap/$city"),
+      );
 
-      case "medium":
-        return BitmapDescriptor.defaultMarkerWithHue(
-          BitmapDescriptor.hueYellow,
-        );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        Set<Circle> circles = {};
 
-      default:
-        return BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen);
+        for (var item in data) {
+          double intensity = (item["weight"] as num).toDouble();
+          // Clamp intensity between 0.2 and 0.9 for visibility
+          intensity = intensity.clamp(0.2, 0.9);
+
+          circles.add(
+            Circle(
+              circleId: CircleId('${item["lat"]}-${item["lng"]}'),
+              center: LatLng(item["lat"], item["lng"]),
+              radius: 200, // meters
+              fillColor: Colors.red.withOpacity(intensity),
+              strokeWidth: 0,
+            ),
+          );
+        }
+
+        setState(() {
+          _heatCircles = circles;
+        });
+      } else {
+        debugPrint("Heatmap API Error: ${response.statusCode}");
+      }
+    } catch (e) {
+      debugPrint("Heatmap Load Error: $e");
     }
   }
 
-  /// ================= CARD COLOR =================
-  Color _crimeColor(String level) {
-    switch (level.toLowerCase()) {
-      case "high":
-        return Colors.red;
-      case "medium":
-        return Colors.orange;
-      default:
-        return Colors.green;
-    }
-  }
-
-  /// ================= SEARCH =================
+  /// ================== SEARCH CITY ==================
   Future<void> _searchCity() async {
     final city = _searchController.text.trim();
     if (city.isEmpty) return;
 
     setState(() => _loading = true);
 
-    try {
-      final location = await _getLatLngFromCity(city);
-
-      if (location == null) {
-        _showMsg("City not found");
-        setState(() => _loading = false);
-        return;
-      }
-
-      final crimeData = await api.getCityCrimeLevel(city);
-      final level = crimeData["crime_level"] ?? "low";
-
-      final marker = Marker(
-        markerId: MarkerId(city),
-        position: location,
-        icon: _getMarkerColor(level),
-        infoWindow: InfoWindow(title: city, snippet: "Crime Level: $level"),
-      );
-
-      setState(() {
-        _markers.clear();
-        _markers.add(marker);
-
-        _currentCity = city;
-        _currentCrimeLevel = level;
-      });
-
-      _mapController?.animateCamera(CameraUpdate.newLatLngZoom(location, 12));
-    } catch (e) {
-      debugPrint(e.toString());
-      _showMsg("Something went wrong");
+    final location = await _getLatLngFromCity(city);
+    if (location == null) {
+      _showMsg("City not found");
+      setState(() => _loading = false);
+      return;
     }
+
+    // Move camera to city
+    _mapController?.animateCamera(CameraUpdate.newLatLngZoom(location, 12));
+
+    // Load backend heatmap
+    await _loadHeatmap(city);
 
     setState(() => _loading = false);
   }
@@ -331,18 +295,18 @@ class _CrimeMapScreenState extends State<CrimeMapScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  /// ================= UI =================
+  /// ================== UI ==================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Crime Map"),
+        title: const Text("Crime Map Heatmap"),
         backgroundColor: Colors.indigo,
         centerTitle: true,
       ),
       body: Column(
         children: [
-          /// SEARCH BAR
+          // ===== SEARCH BAR =====
           Container(
             margin: const EdgeInsets.all(12),
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -379,71 +343,19 @@ class _CrimeMapScreenState extends State<CrimeMapScreen> {
             ),
           ),
 
-          /// MAP + CRIME CARD
+          // ===== GOOGLE MAP WITH HEATMAP =====
           Expanded(
-            child: Stack(
-              children: [
-                GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: _defaultCenter,
-                    zoom: 5,
-                  ),
-                  markers: _markers,
-                  myLocationEnabled: true,
-                  zoomControlsEnabled: true,
-                  onMapCreated: (controller) {
-                    _mapController = controller;
-                  },
-                ),
-
-                /// ===== CRIME LEVEL CARD =====
-                if (_currentCity.isNotEmpty)
-                  Positioned(
-                    top: 20,
-                    left: 20,
-                    right: 20,
-                    child: Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15),
-                        boxShadow: const [
-                          BoxShadow(color: Colors.black26, blurRadius: 8),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.warning,
-                            color: _crimeColor(_currentCrimeLevel),
-                            size: 32,
-                          ),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _currentCity,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                "Crime Level: ${_currentCrimeLevel.toUpperCase()}",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  color: _crimeColor(_currentCrimeLevel),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
+            child: GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: _defaultCenter,
+                zoom: 5,
+              ),
+              myLocationEnabled: true,
+              zoomControlsEnabled: true,
+              circles: _heatCircles, // <-- replaced heatmaps with circles
+              onMapCreated: (controller) {
+                _mapController = controller;
+              },
             ),
           ),
         ],
