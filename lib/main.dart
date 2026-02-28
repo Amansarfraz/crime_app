@@ -614,16 +614,16 @@ class MyApp extends StatelessWidget {
       title: 'Crime Rate Alert',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        brightness: Brightness.light,
-        fontFamily: 'Poppins',
         primarySwatch: Colors.brown,
+        fontFamily: 'Poppins',
+        scaffoldBackgroundColor: Colors.white, // default light bg
       ),
       darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        fontFamily: 'Poppins',
         primarySwatch: Colors.brown,
+        fontFamily: 'Poppins',
+        scaffoldBackgroundColor: Colors.black87, // dark bg
       ),
-      themeMode: themeProvider.currentTheme,
+      themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
