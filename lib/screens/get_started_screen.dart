@@ -110,7 +110,10 @@ class _GetStartedScreenState extends State<GetStartedScreen> {
                         ); // 👉 Add your navigation here
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white.withOpacity(0.8),
+                        //backgroundColor: Colors.white.withOpacity(0.8),
+                        backgroundColor: Theme.of(
+                          context,
+                        ).scaffoldBackgroundColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(40),
                         ),

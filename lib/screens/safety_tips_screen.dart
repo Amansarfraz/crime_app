@@ -23,7 +23,8 @@ class SafetyTipsScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FA),
+      //backgroundColor: const Color(0xFFF4F6FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           // 🔵 Simple Header

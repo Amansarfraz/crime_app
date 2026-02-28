@@ -63,7 +63,8 @@ class _StatsScreenState extends State<StatsScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1B0A57),
+      //backgroundColor: const Color(0xFF1B0A57),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Recent Cities — Crime Trend'),
         backgroundColor: const Color(0xFF3B16BD),
