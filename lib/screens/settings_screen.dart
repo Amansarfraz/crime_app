@@ -1697,7 +1697,6 @@
 //     );
 //   }
 // }
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme_provider.dart';
@@ -1719,19 +1718,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            /// ✅ HEADER (UNCHANGED)
+            // Header
             Container(
               height: 80,
               width: double.infinity,
-              color: theme.primaryColor,
+              color: const Color(0xFF2209B4), // 💙 Blue for header
               padding: const EdgeInsets.only(top: 35, left: 16, right: 16),
               child: Row(
                 children: [
@@ -1756,13 +1754,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
 
-            /// 🌙 DARK MODE
+            // Dark Mode toggle
             _buildSettingTile(
               icon: Icons.dark_mode,
-              color: Colors.blue.shade100,
+              iconBackground: Colors.blue.shade100,
               title: "Dark Mode",
               subtitle: "Switch to dark mode",
               trailing: Switch(
@@ -1772,10 +1769,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
 
-            /// 🔔 NOTIFICATIONS
+            // Notifications
             _buildSettingTile(
               icon: Icons.notifications_active,
-              color: Colors.blue.shade200,
+              iconBackground: Colors.blue.shade200,
               title: "Notifications",
               subtitle: "Enable push notifications",
               trailing: Switch(
@@ -1785,10 +1782,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
 
-            /// 🌍 LANGUAGE
+            // Language
             _buildSettingTile(
               icon: Icons.language,
-              color: Colors.deepPurple.shade100,
+              iconBackground: Colors.blue.shade100, // 💙 Keep blue
               title: "Language",
               subtitle: "Selected: $selectedLanguage",
               trailing: const Icon(
@@ -1801,17 +1798,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   context,
                   MaterialPageRoute(builder: (_) => const LanguageScreen()),
                 );
-
                 if (result != null && result is String) {
                   setState(() => selectedLanguage = result);
                 }
               },
             ),
 
-            /// ℹ️ ABOUT
+            // About App
             _buildSettingTile(
               icon: Icons.info_outline,
-              color: Colors.blue.shade100,
+              iconBackground: Colors.blue.shade100, // 💙 Keep blue
               title: "About App",
               subtitle: "App information",
               trailing: const Icon(
@@ -1827,10 +1823,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
 
-            /// 🚪 LOGOUT
+            // Logout
             _buildSettingTile(
               icon: Icons.logout,
-              color: Colors.red.shade100,
+              iconBackground: Colors.red.shade100, // 🔴 red for logout
               title: "Logout",
               subtitle: "Sign out from your account",
               trailing: const Icon(
@@ -1848,7 +1844,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             const SizedBox(height: 30),
 
-            /// ✅ LOGO
+            // App Logo
             Stack(
               alignment: Alignment.center,
               children: [
@@ -1857,32 +1853,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   height: 90,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: theme.primaryColor,
+                    color: const Color(0xFF2209B4), // 💙 Blue background
                   ),
                 ),
-                Image.asset('assets/images/Group.png', width: 40, height: 50),
+                Image.asset(
+                  'assets/images/Group.png',
+                  width: 40,
+                  height: 50,
+                  fit: BoxFit.cover,
+                ),
               ],
             ),
-
             const SizedBox(height: 20),
-
-            /// ✅ TEXT AUTO DARK/LIGHT
             Text(
               "Crime Rate Alert",
-              style: theme.textTheme.bodyLarge?.copyWith(
+              style: TextStyle(
+                fontFamily: 'Poppins',
                 fontWeight: FontWeight.w600,
                 fontSize: 18,
+                color: isDark ? Colors.white : Colors.black,
               ),
             ),
-
             const SizedBox(height: 6),
-
-            Text("Stay Informed, Stay Safe", style: theme.textTheme.bodyMedium),
-
+            Text(
+              "Stay Informed, Stay Safe",
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                color: isDark ? Colors.white70 : Colors.black87,
+                fontSize: 13,
+              ),
+            ),
             const SizedBox(height: 6),
-
-            Text("Version 1.0.0", style: theme.textTheme.bodyMedium),
-
+            Text(
+              "Version 1.0.0",
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 13,
+                color: isDark ? Colors.white70 : Colors.black54,
+              ),
+            ),
             const SizedBox(height: 20),
           ],
         ),
@@ -1890,16 +1899,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  /// ✅ TILE
   Widget _buildSettingTile({
     required IconData icon,
-    required Color color,
+    required Color iconBackground,
     required String title,
     required String subtitle,
     Widget? trailing,
     VoidCallback? onTap,
   }) {
-    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: onTap,
@@ -1907,8 +1915,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: theme.cardColor,
+          color: isDark ? Colors.grey[850] : Colors.white,
           borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -1916,25 +1931,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
               width: 45,
               height: 45,
               decoration: BoxDecoration(
-                color: color,
+                color: iconBackground,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: const Color(0xFF2209B4)),
+              child: Icon(icon, color: const Color(0xFF2209B4), size: 24),
             ),
-
             const SizedBox(width: 14),
-
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: theme.textTheme.bodyLarge),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text(subtitle, style: theme.textTheme.bodyMedium),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12,
+                      color: isDark ? Colors.white70 : Colors.black54,
+                    ),
+                  ),
                 ],
               ),
             ),
-
             if (trailing != null) trailing,
           ],
         ),
