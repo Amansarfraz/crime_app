@@ -290,9 +290,7 @@ class _CrimeMapScreenState extends State<CrimeMapScreen> {
     try {
       // ─── Pehle city ka crime level FastAPI se lo ───
       final cityRes = await http.get(
-        Uri.parse(
-          "http://192.168.100.8:8000/city/${Uri.encodeComponent(city)}",
-        ),
+        Uri.parse("http://127.0.0.1:8000/city/${Uri.encodeComponent(city)}"),
       );
 
       String crimeLevel = 'medium'; // default
@@ -311,7 +309,7 @@ class _CrimeMapScreenState extends State<CrimeMapScreen> {
 
       final heatRes = await http.get(
         Uri.parse(
-          "http://192.168.100.8:8000/map/heatmap/${Uri.encodeComponent(city)}",
+          "http://127.0.0.1:8000/map/heatmap/${Uri.encodeComponent(city)}",
         ),
       );
 
