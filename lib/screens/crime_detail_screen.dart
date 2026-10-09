@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math';
+import '../app_text.dart';
 
 class CrimeDetailScreen extends StatefulWidget {
   final String cityName;
@@ -22,48 +23,22 @@ class CrimeDetailScreen extends StatefulWidget {
 
 class _CrimeDetailScreenState extends State<CrimeDetailScreen> {
   late int incidentsCount;
-  late int severityIndex;
-  late List<String> safetyTips;
+  late int severity;
 
   @override
   void initState() {
     super.initState();
-
     final random = Random();
     incidentsCount = widget.localCount + random.nextInt(100);
-    severityIndex = 40 + random.nextInt(60);
-
-    safetyTips = _getSafetyTips(widget.crimeKey);
-  }
-
-  List<String> _getSafetyTips(String crimeType) {
-    switch (crimeType.toLowerCase()) {
-      case 'theft':
-        return [
-          "Always lock your doors and windows.",
-          "Avoid displaying valuables in public.",
-          "Install a security system if possible.",
-        ];
-      case 'robbery':
-        return [
-          "Stay alert in less crowded areas.",
-          "Avoid walking alone late at night.",
-          "Report suspicious activity immediately.",
-        ];
-      case 'cybercrime':
-        return [
-          "Use strong and unique passwords.",
-          "Avoid sharing personal info online.",
-          "Keep your software up to date.",
-        ];
-      default:
-        return ["Stay safe and alert in your area."];
-    }
+    severity = 40 + random.nextInt(60);
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final t = AppText.of(context);
+    final safetyTips = t.detailTipsFor(widget.crimeKey);
+    final localizedCrime = t.crimeTitleFor(widget.crimeKey);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -71,7 +46,7 @@ class _CrimeDetailScreenState extends State<CrimeDetailScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF2209B4),
         title: Text(
-          "${widget.crimeTitle} in ${widget.cityName}",
+          "$localizedCrime ${t.inWord} ${widget.cityName}",
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -84,7 +59,7 @@ class _CrimeDetailScreenState extends State<CrimeDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// ✅ CITY SUMMARY BOX
+            // CITY SUMMARY BOX
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -96,7 +71,7 @@ class _CrimeDetailScreenState extends State<CrimeDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "City: ${widget.cityName}",
+                    "${t.cityLabel}: ${widget.cityName}",
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -106,7 +81,7 @@ class _CrimeDetailScreenState extends State<CrimeDetailScreen> {
                   const SizedBox(height: 8),
 
                   Text(
-                    "Crime Type: ${widget.crimeTitle}",
+                    "${t.crimeType}: $localizedCrime",
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       color: isDark ? Colors.white70 : Colors.black,
@@ -116,7 +91,7 @@ class _CrimeDetailScreenState extends State<CrimeDetailScreen> {
                   const SizedBox(height: 8),
 
                   Text(
-                    "Reported Incidents: $incidentsCount",
+                    "${t.reportedIncidents}: $incidentsCount",
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       color: Colors.redAccent,
@@ -127,7 +102,7 @@ class _CrimeDetailScreenState extends State<CrimeDetailScreen> {
                   const SizedBox(height: 8),
 
                   Text(
-                    "Crime Severity Index: $severityIndex%",
+                    "${t.severityIndex}: $severity%",
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       color: Colors.deepOrange,
@@ -140,9 +115,8 @@ class _CrimeDetailScreenState extends State<CrimeDetailScreen> {
 
             const SizedBox(height: 25),
 
-            /// ✅ SAFETY TITLE
             Text(
-              "Safety Tips:",
+              t.safetyTipsColon,
               style: GoogleFonts.poppins(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -152,7 +126,6 @@ class _CrimeDetailScreenState extends State<CrimeDetailScreen> {
 
             const SizedBox(height: 10),
 
-            /// ✅ SAFETY LIST
             Expanded(
               child: ListView.builder(
                 itemCount: safetyTips.length,

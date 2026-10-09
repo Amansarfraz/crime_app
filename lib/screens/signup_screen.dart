@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart'; // Firebase Auth
+import '../services/api_service.dart'; // FastAPI backend (JWT token)
 import 'log_in_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -17,6 +18,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController passCtrl = TextEditingController();
 
   final AuthService _authService = AuthService();
+  final ApiService _api = ApiService();
 
   bool isLoading = false;
 
@@ -26,6 +28,55 @@ class _SignupScreenState extends State<SignupScreen> {
     emailCtrl.dispose();
     passCtrl.dispose();
     super.dispose();
+  }
+
+  // ---------- Signup Handler ----------
+  Future<void> _handleSignup() async {
+    setState(() => isLoading = true);
+
+    final name = nameCtrl.text.trim();
+    final email = emailCtrl.text.trim();
+    final password = passCtrl.text.trim();
+
+    try {
+      // 1) Firebase Auth Signup
+      final user = await _authService.signUp(email: email, password: password);
+
+      if (user != null) {
+        // 2) Backend (FastAPI) signup -> JWT token save
+        try {
+          await _api.signup(name, email, password);
+        } catch (e) {
+          debugPrint("Backend signup failed: $e");
+          // agar user backend me pehle se hai to login try karo
+          try {
+            await _api.login(email, password);
+          } catch (e2) {
+            debugPrint("Backend login fallback failed: $e2");
+          }
+        }
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Signup successful")));
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LogInScreen()),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Signup failed: ${e.message}")));
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Signup failed: $e")));
+    }
+
+    if (mounted) setState(() => isLoading = false);
   }
 
   @override
@@ -93,47 +144,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         borderRadius: BorderRadius.circular(40),
                       ),
                     ),
-                    onPressed: isLoading
-                        ? null
-                        : () async {
-                            setState(() => isLoading = true);
-
-                            try {
-                              // ✅ Firebase Auth Signup
-                              final user = await _authService.signUp(
-                                email: emailCtrl.text.trim(),
-                                password: passCtrl.text.trim(),
-                              );
-
-                              if (user != null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text("Signup successful"),
-                                  ),
-                                );
-
-                                // Navigate to Login screen
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const LogInScreen(),
-                                  ),
-                                );
-                              }
-                            } on FirebaseAuthException catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Signup failed: ${e.message}"),
-                                ),
-                              );
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text("Signup failed: $e")),
-                              );
-                            }
-
-                            setState(() => isLoading = false);
-                          },
+                    onPressed: isLoading ? null : _handleSignup,
                     child: isLoading
                         ? const CircularProgressIndicator(color: Colors.black)
                         : Text(

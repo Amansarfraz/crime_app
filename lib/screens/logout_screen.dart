@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../services/api_service.dart';
+import '../app_text.dart';
 
 class LogoutScreen extends StatefulWidget {
   const LogoutScreen({super.key});
@@ -13,6 +15,9 @@ class _LogoutScreenState extends State<LogoutScreen>
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+
+  final ApiService _api = ApiService();
+  bool _loggingOut = false;
 
   @override
   void initState() {
@@ -42,9 +47,34 @@ class _LogoutScreenState extends State<LogoutScreen>
     super.dispose();
   }
 
+  // ----------------- DO LOGOUT -----------------
+  Future<void> _doLogout() async {
+    if (_loggingOut) return;
+    setState(() => _loggingOut = true);
+
+    try {
+      await _api.logout(); // token delete
+    } catch (_) {
+      // ignore - phir bhi login pe bhej do
+    }
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppText.of(context).loggedOut),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    // login screen pe jao + saari purani screens stack se hata do
+    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final t = AppText.of(context);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -53,7 +83,7 @@ class _LogoutScreenState extends State<LogoutScreen>
         backgroundColor: const Color(0xFF2209B4),
         centerTitle: true,
         title: Text(
-          "Logout",
+          t.logout,
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w600,
             color: Colors.white,
@@ -69,7 +99,7 @@ class _LogoutScreenState extends State<LogoutScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                /// 🔵 ICON
+                /// ICON
                 ScaleTransition(
                   scale: _scaleAnimation,
                   child: Container(
@@ -99,7 +129,7 @@ class _LogoutScreenState extends State<LogoutScreen>
 
                 /// TEXT
                 Text(
-                  "Are you sure you want to log out?",
+                  t.logoutConfirm,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     fontSize: 18,
@@ -110,7 +140,7 @@ class _LogoutScreenState extends State<LogoutScreen>
 
                 const SizedBox(height: 25),
 
-                /// ✅ CARD BOX
+                /// CARD BOX
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 600),
                   padding: const EdgeInsets.symmetric(
@@ -145,33 +175,35 @@ class _LogoutScreenState extends State<LogoutScreen>
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Logged out successfully!"),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          "Yes, Log Out",
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
-                        ),
+                        onPressed: _loggingOut ? null : _doLogout,
+                        child: _loggingOut
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                t.yesLogout,
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                ),
+                              ),
                       ),
 
                       const SizedBox(height: 12),
 
                       /// CANCEL
                       TextButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: _loggingOut
+                            ? null
+                            : () => Navigator.pop(context),
                         child: Text(
-                          "Cancel",
+                          t.cancel,
                           style: GoogleFonts.poppins(
                             fontSize: 14,
                             color: isDark ? Colors.white70 : Colors.grey[600],
@@ -188,7 +220,7 @@ class _LogoutScreenState extends State<LogoutScreen>
                 Column(
                   children: [
                     Text(
-                      "Crime Rate Alert",
+                      t.appName,
                       style: GoogleFonts.poppins(
                         color: const Color(0xFF2209B4),
                         fontWeight: FontWeight.w600,
@@ -196,7 +228,7 @@ class _LogoutScreenState extends State<LogoutScreen>
                       ),
                     ),
                     Text(
-                      "Stay Informed, Stay Safe 🔒",
+                      "${t.tagline} 🔒",
                       style: GoogleFonts.poppins(
                         color: isDark ? Colors.white70 : Colors.black,
                         fontSize: 13,

@@ -1,0 +1,63 @@
+{
+  "categories": [
+    {
+      "name": "Robbery",
+      "description": "Street robberies, mobile snatching, purse snatching.",
+      "safety_tips": [
+        "Avoid isolated streets at night.",
+        "Keep your phone inside your pocket in public areas.",
+        "If you feel followed, move to a crowded place immediately."
+      ]
+    },
+    {
+      "name": "Assault",
+      "description": "Physical attacks, fights, harassment.",
+      "safety_tips": [
+        "Avoid conflict-heavy areas.",
+        "Travel in groups whenever possible.",
+        "Always be aware of your surroundings."
+      ]
+    },
+    {
+      "name": "Burglary",
+      "description": "House break-ins, property theft.",
+      "safety_tips": [
+        "Install cameras or alarms at home.",
+        "Lock doors and windows properly.",
+        "Avoid announcing travel plans publicly."
+      ]
+    },
+    {
+      "name": "Fraud",
+      "description": "Online scams, ATM fraud, identity theft.",
+      "safety_tips": [
+        "Do not share OTP or personal info with unknown numbers.",
+        "Use official websites for payments only.",
+        "Avoid clicking suspicious links."
+      ]
+    },
+    {
+      "name": "Harassment",
+      "description": "Sexual harassment, stalking, threatening behavior.",
+      "safety_tips": [
+        "Report suspicious individuals immediately.",
+        "Share your live location with a trusted person.",
+        "Avoid walking alone at late hours."
+      ]
+    }
+  ],
+
+  "emergency_contacts": [
+    { "name": "Police", "number": "15" },
+    { "name": "Fire Brigade", "number": "16" },
+    { "name": "Rescue 1122", "number": "1122" }
+  ],
+
+  "generic_safety_tips": [
+    "Avoid isolated areas at night.",
+    "Share your location with trusted contacts when traveling.",
+    "Keep emergency numbers saved.",
+    "Always stay aware of your surroundings.",
+    "Don’t trust strangers with personal information."
+  ]
+}

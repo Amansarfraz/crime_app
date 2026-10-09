@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme_provider.dart';
+import '../app_text.dart';
 import 'language_screen.dart';
 import 'about_app_screen.dart';
 import 'logout_screen.dart';
@@ -14,12 +15,13 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   bool notifications = true;
-  String selectedLanguage = 'English';
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final t = AppText.of(context);
+    final currentLang = t.ur ? "اردو" : "English";
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -30,7 +32,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Container(
               height: 80,
               width: double.infinity,
-              color: const Color(0xFF2209B4), // 💙 Blue for header
+              color: const Color(0xFF2209B4),
               padding: const EdgeInsets.only(top: 35, left: 16, right: 16),
               child: Row(
                 children: [
@@ -43,9 +45,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                  const Text(
-                    "Settings",
-                    style: TextStyle(
+                  Text(
+                    t.settings,
+                    style: const TextStyle(
                       fontFamily: 'Poppins',
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
@@ -61,8 +63,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildSettingTile(
               icon: Icons.dark_mode,
               iconBackground: Colors.blue.shade100,
-              title: "Dark Mode",
-              subtitle: "Switch to dark mode",
+              title: t.darkMode,
+              subtitle: t.darkModeSub,
               trailing: Switch(
                 value: themeProvider.isDarkMode,
                 activeColor: const Color(0xFF2209B4),
@@ -74,8 +76,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildSettingTile(
               icon: Icons.notifications_active,
               iconBackground: Colors.blue.shade200,
-              title: "Notifications",
-              subtitle: "Enable push notifications",
+              title: t.notifications,
+              subtitle: t.notificationsSub,
               trailing: Switch(
                 value: notifications,
                 activeColor: const Color(0xFF2209B4),
@@ -86,31 +88,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // Language
             _buildSettingTile(
               icon: Icons.language,
-              iconBackground: Colors.blue.shade100, // 💙 Keep blue
-              title: "Language",
-              subtitle: "Selected: $selectedLanguage",
+              iconBackground: Colors.blue.shade100,
+              title: t.language,
+              subtitle: "${t.languageSub}: $currentLang",
               trailing: const Icon(
                 Icons.arrow_forward_ios,
                 color: Colors.grey,
                 size: 18,
               ),
-              onTap: () async {
-                final result = await Navigator.push(
+              onTap: () {
+                Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const LanguageScreen()),
                 );
-                if (result != null && result is String) {
-                  setState(() => selectedLanguage = result);
-                }
               },
             ),
 
             // About App
             _buildSettingTile(
               icon: Icons.info_outline,
-              iconBackground: Colors.blue.shade100, // 💙 Keep blue
-              title: "About App",
-              subtitle: "App information",
+              iconBackground: Colors.blue.shade100,
+              title: t.aboutApp,
+              subtitle: t.aboutAppSub,
               trailing: const Icon(
                 Icons.arrow_forward_ios,
                 color: Colors.grey,
@@ -127,9 +126,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // Logout
             _buildSettingTile(
               icon: Icons.logout,
-              iconBackground: Colors.red.shade100, // 🔴 red for logout
-              title: "Logout",
-              subtitle: "Sign out from your account",
+              iconBackground: Colors.red.shade100,
+              title: t.logout,
+              subtitle: t.logoutSub,
               trailing: const Icon(
                 Icons.arrow_forward_ios,
                 color: Colors.grey,
@@ -152,9 +151,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Container(
                   width: 90,
                   height: 90,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF2209B4), // 💙 Blue background
+                    color: Color(0xFF2209B4),
                   ),
                 ),
                 Image.asset(
@@ -167,7 +166,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              "Crime Rate Alert",
+              t.appName,
               style: TextStyle(
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w600,
@@ -177,7 +176,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              "Stay Informed, Stay Safe",
+              t.tagline,
               style: TextStyle(
                 fontFamily: 'Poppins',
                 color: isDark ? Colors.white70 : Colors.black87,
@@ -186,7 +185,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              "Version 1.0.0",
+              "${t.version} 1.0.0",
               style: TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 13,

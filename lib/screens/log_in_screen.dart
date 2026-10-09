@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'home_screen.dart';
 import '../services/auth_service.dart'; // Firebase Auth
-// import '../services/storage_service.dart'; // optional if used
+import '../services/api_service.dart'; // FastAPI backend (JWT token)
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LogInScreen extends StatefulWidget {
@@ -17,6 +17,7 @@ class _LogInScreenState extends State<LogInScreen> {
   final TextEditingController passCtrl = TextEditingController();
 
   final AuthService _authService = AuthService();
+  final ApiService _api = ApiService();
 
   bool isLoading = false;
 
@@ -112,10 +113,7 @@ class _LogInScreenState extends State<LogInScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.pushReplacementNamed(
-                          context,
-                          '/signup_screen',
-                        );
+                        Navigator.pushReplacementNamed(context, '/signup');
                       },
                       child: Text(
                         "Sign Up",
@@ -163,13 +161,23 @@ class _LogInScreenState extends State<LogInScreen> {
   void _handleLogin() async {
     setState(() => isLoading = true);
 
+    final email = emailCtrl.text.trim();
+    final password = passCtrl.text.trim();
+
     try {
-      final user = await _authService.login(
-        email: emailCtrl.text.trim(),
-        password: passCtrl.text.trim(),
-      );
+      // 1) Firebase login
+      final user = await _authService.login(email: email, password: password);
 
       if (user != null) {
+        // 2) Backend (FastAPI) login -> JWT token save (for assistant/analytics)
+        try {
+          await _api.login(email, password);
+        } catch (e) {
+          // backend login fail hone par bhi app chalega, par assistant kaam nahi karega
+          debugPrint("Backend login failed: $e");
+        }
+
+        if (!mounted) return;
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text("Login successful")));
@@ -189,6 +197,6 @@ class _LogInScreenState extends State<LogInScreen> {
       ).showSnackBar(SnackBar(content: Text("Login failed: $e")));
     }
 
-    setState(() => isLoading = false);
+    if (mounted) setState(() => isLoading = false);
   }
 }

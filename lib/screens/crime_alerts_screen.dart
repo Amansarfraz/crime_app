@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'home_screen.dart'; // ← Import your real HomeScreen here
+import 'package:url_launcher/url_launcher.dart';
+import '../app_text.dart';
 
 class CrimeAlertsScreen extends StatelessWidget {
   final String city;
@@ -24,6 +25,19 @@ class CrimeAlertsScreen extends StatelessWidget {
         return Colors.green;
       default:
         return Colors.grey;
+    }
+  }
+
+  String localizedLevel(AppText t, String level) {
+    switch (level) {
+      case 'High':
+        return t.high;
+      case 'Medium':
+        return t.medium;
+      case 'Low':
+        return t.low;
+      default:
+        return level;
     }
   }
 
@@ -58,8 +72,27 @@ class CrimeAlertsScreen extends StatelessWidget {
     return DateFormat('hh:mm a').format(time);
   }
 
+  Future<void> _callNumber(BuildContext context, String number) async {
+    final uri = Uri(scheme: 'tel', path: number);
+    try {
+      final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok && context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Dialer error: $number")));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Call error: $number")));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final t = AppText.of(context);
     final color = getLevelColor(crimeLevel);
     final tips = getSafetyTips(crimeLevel);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -73,9 +106,12 @@ class CrimeAlertsScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Crime Alerts',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        title: Text(
+          t.crimeAlerts,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -84,17 +120,14 @@ class CrimeAlertsScreen extends StatelessWidget {
         unselectedItemColor: Colors.grey,
         onTap: (index) {
           if (index == 0) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-            );
+            Navigator.pop(context);
           }
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.home), label: t.home),
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Alerts',
+            icon: const Icon(Icons.notifications),
+            label: t.alerts,
           ),
         ],
       ),
@@ -103,15 +136,16 @@ class CrimeAlertsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Last Search
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Last Search Result',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                Text(
+                  t.lastSearchResult,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                Text('2 min ago', style: TextStyle(color: Colors.grey[600])),
               ],
             ),
             const SizedBox(height: 12),
@@ -134,11 +168,13 @@ class CrimeAlertsScreen extends StatelessWidget {
                           children: [
                             Row(
                               children: [
-                                Text(
-                                  city,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
+                                Expanded(
+                                  child: Text(
+                                    city,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
@@ -152,7 +188,7 @@ class CrimeAlertsScreen extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
-                                    '${crimeLevel.toUpperCase()} RISK',
+                                    localizedLevel(t, crimeLevel),
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 12,
@@ -171,20 +207,12 @@ class CrimeAlertsScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  'Crime Level: $crimeLevel',
+                                  "${t.crimeLevel}: ${localizedLevel(t, crimeLevel)}",
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: isDark
                                         ? Colors.white70
                                         : Colors.black87,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Text(
-                                  'Updated: Now',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
                                   ),
                                 ),
                               ],
@@ -205,7 +233,7 @@ class CrimeAlertsScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Safety Recommendations',
+                          t.safetyRecommendations,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: color,
@@ -213,8 +241,8 @@ class CrimeAlertsScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         ...tips.map(
-                          (t) => Text(
-                            '• $t',
+                          (tip) => Text(
+                            '• $tip',
                             style: TextStyle(
                               color: isDark ? Colors.white70 : Colors.black87,
                             ),
@@ -228,46 +256,45 @@ class CrimeAlertsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Quick Actions
-            const Text(
-              'Quick Actions',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            Text(
+              t.quickActions,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _quickAction(context, Icons.search, 'Search', () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HomeScreen()),
-                  );
+                _quickAction(context, Icons.search, t.search, () {
+                  Navigator.pop(context);
                 }),
                 _quickAction(
                   context,
                   Icons.phone,
-                  'Emergency',
-                  () => _showEmergencySheet(context),
+                  t.emergency,
+                  () => _showEmergencySheet(context, t),
                 ),
               ],
             ),
             const SizedBox(height: 20),
 
-            // Recent Searches
-            const Text(
-              'Recent Searches',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            Text(
+              t.recentSearches,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
             if (recentSearches.isEmpty)
               Text(
-                'No recent searches yet.',
+                t.ur ? "کوئی حالیہ تلاش نہیں" : "No recent searches yet.",
                 style: TextStyle(color: isDark ? Colors.white70 : Colors.grey),
               )
             else
               Column(
                 children: recentSearches.map((item) {
-                  final time = item['time'] ?? DateTime.now();
+                  final rawTime = item['time'];
+                  final time = rawTime is DateTime
+                      ? rawTime
+                      : DateTime.tryParse(rawTime?.toString() ?? '') ??
+                            DateTime.now();
                   final level = item['level'] ?? 'Low';
                   final cityName = item['city'] ?? 'Unknown';
                   return _recentSearch(
@@ -276,6 +303,7 @@ class CrimeAlertsScreen extends StatelessWidget {
                     timeAgo(time),
                     getLevelColor(level),
                     context,
+                    t,
                   );
                 }).toList(),
               ),
@@ -325,44 +353,80 @@ class CrimeAlertsScreen extends StatelessWidget {
     );
   }
 
-  void _showEmergencySheet(BuildContext context) {
+  void _showEmergencySheet(BuildContext context, AppText t) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => Padding(
+      builder: (sheetContext) => Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: const [
+          children: [
             Text(
-              'Emergency Contacts',
-              style: TextStyle(
+              t.emergencyContacts,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.redAccent,
               ),
             ),
-            SizedBox(height: 12),
-            ListTile(
-              leading: Icon(Icons.local_police, color: Colors.blue),
-              title: Text('Police'),
-              trailing: Text('15'),
+            const SizedBox(height: 4),
+            Text(
+              t.tapToCall,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
-            ListTile(
-              leading: Icon(Icons.local_hospital, color: Colors.green),
-              title: Text('Ambulance'),
-              trailing: Text('1122'),
+            const SizedBox(height: 12),
+            _emergencyTile(
+              context,
+              icon: Icons.local_police,
+              iconColor: Colors.blue,
+              title: t.police,
+              number: '15',
             ),
-            ListTile(
-              leading: Icon(Icons.fire_truck, color: Colors.orange),
-              title: Text('Fire Brigade'),
-              trailing: Text('16'),
+            _emergencyTile(
+              context,
+              icon: Icons.local_hospital,
+              iconColor: Colors.green,
+              title: t.ambulance,
+              number: '1122',
+            ),
+            _emergencyTile(
+              context,
+              icon: Icons.fire_truck,
+              iconColor: Colors.orange,
+              title: t.fireBrigade,
+              number: '16',
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _emergencyTile(
+    BuildContext context, {
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String number,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: iconColor),
+      title: Text(title),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(number, style: const TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(width: 8),
+          const Icon(Icons.call, color: Colors.green, size: 20),
+        ],
+      ),
+      onTap: () {
+        Navigator.pop(context);
+        _callNumber(context, number);
+      },
     );
   }
 
@@ -372,6 +436,7 @@ class CrimeAlertsScreen extends StatelessWidget {
     String time,
     Color dotColor,
     BuildContext context,
+    AppText t,
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
@@ -401,7 +466,7 @@ class CrimeAlertsScreen extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Crime Level: $level',
+                    "${t.crimeLevel}: ${localizedLevel(t, level)}",
                     style: TextStyle(
                       color: isDark ? Colors.white70 : Colors.black54,
                     ),

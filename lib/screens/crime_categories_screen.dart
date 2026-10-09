@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import '../app_text.dart';
 import 'crime_detail_screen.dart';
 
 class CrimeCategoriesScreen extends StatefulWidget {
@@ -14,7 +15,6 @@ class _CrimeCategoriesScreenState extends State<CrimeCategoriesScreen> {
   final stt.SpeechToText _speech = stt.SpeechToText();
   bool _isListening = false;
 
-  // Embedded sample dataset
   static const Map<String, Map<String, dynamic>> pkCityStats = {
     'lahore': {
       'population': 11126285,
@@ -101,7 +101,7 @@ class _CrimeCategoriesScreenState extends State<CrimeCategoriesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Dynamic colors for dark/light mode
+    final t = AppText.of(context);
     final textColor = Theme.of(context).brightness == Brightness.dark
         ? Colors.white
         : Colors.black;
@@ -113,69 +113,20 @@ class _CrimeCategoriesScreenState extends State<CrimeCategoriesScreen> {
         : const Color(0xFF2488DA);
 
     final List<Map<String, dynamic>> crimes = [
-      {
-        'title': 'Theft',
-        'key': 'theft',
-        'desc':
-            "Unauthorized taking of someone else's property with intent to permanently deprive them of it.",
-        'icon': Icons.lock_open,
-      },
-      {
-        'title': 'Robbery',
-        'key': 'robbery',
-        'desc':
-            "Taking property from a person using force, threat of force, or intimidation.",
-        'icon': Icons.remove_red_eye,
-      },
-      {
-        'title': 'Cybercrime',
-        'key': 'cybercrime',
-        'desc':
-            "Criminal activities carried out using computers, networks or digital devices.",
-        'icon': Icons.computer,
-      },
-      {
-        'title': 'Harassment',
-        'key': 'harassment',
-        'desc':
-            "Unwanted behavior that is intended to disturb or upset other person repeatedly.",
-        'icon': Icons.warning_amber_rounded,
-      },
-      {
-        'title': 'Assault',
-        'key': 'assault',
-        'desc':
-            "Intentional act that creates fear of imminent harmful or offensive contact.",
-        'icon': Icons.gavel,
-      },
-      {
-        'title': 'Vandalism',
-        'key': 'vandalism',
-        'desc':
-            "Deliberate destruction or damage to public or private property.",
-        'icon': Icons.brush,
-      },
-      {
-        'title': 'Fraud',
-        'key': 'fraud',
-        'desc':
-            "Wrongful deception intended to result in financial or personal gain.",
-        'icon': Icons.credit_card,
-      },
-      {
-        'title': 'Drug Offense',
-        'key': 'drugs',
-        'desc':
-            "Crimes related to illegal possession, distribution, or manufacturing of controlled substances.",
-        'icon': Icons.medication_liquid,
-      },
+      {'key': 'theft', 'icon': Icons.lock_open},
+      {'key': 'robbery', 'icon': Icons.remove_red_eye},
+      {'key': 'cybercrime', 'icon': Icons.computer},
+      {'key': 'harassment', 'icon': Icons.warning_amber_rounded},
+      {'key': 'assault', 'icon': Icons.gavel},
+      {'key': 'vandalism', 'icon': Icons.brush},
+      {'key': 'fraud', 'icon': Icons.credit_card},
+      {'key': 'drugs', 'icon': Icons.medication_liquid},
     ];
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
-          // Header
           Container(
             height: 80,
             width: double.infinity,
@@ -187,7 +138,7 @@ class _CrimeCategoriesScreenState extends State<CrimeCategoriesScreen> {
                   onPressed: () => Navigator.pop(context),
                 ),
                 Text(
-                  "Crime Categories",
+                  t.crimeCategories,
                   style: GoogleFonts.poppins(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -203,6 +154,7 @@ class _CrimeCategoriesScreenState extends State<CrimeCategoriesScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: crimes.map((crime) {
+                  final key = crime['key'] as String;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 20),
                     child: Container(
@@ -251,7 +203,7 @@ class _CrimeCategoriesScreenState extends State<CrimeCategoriesScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        crime['title'] as String,
+                                        t.crimeTitleFor(key),
                                         style: GoogleFonts.poppins(
                                           color: textColor,
                                           fontWeight: FontWeight.bold,
@@ -260,10 +212,10 @@ class _CrimeCategoriesScreenState extends State<CrimeCategoriesScreen> {
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
-                                        crime['desc'] as String,
+                                        t.crimeDescFor(key),
                                         style: GoogleFonts.poppins(
                                           color: subTextColor,
-                                          fontSize: 16,
+                                          fontSize: 14,
                                           fontWeight: FontWeight.w400,
                                           height: 1.3,
                                         ),
@@ -287,11 +239,11 @@ class _CrimeCategoriesScreenState extends State<CrimeCategoriesScreen> {
                                 final city = await showDialog<String?>(
                                   context: context,
                                   builder: (context) {
-                                    final TextEditingController _cityCtrl =
+                                    final TextEditingController cityCtrl =
                                         TextEditingController();
                                     return AlertDialog(
                                       title: Text(
-                                        'Enter City Name',
+                                        t.enterCityDialog,
                                         style: GoogleFonts.poppins(
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -300,10 +252,9 @@ class _CrimeCategoriesScreenState extends State<CrimeCategoriesScreen> {
                                         children: [
                                           Expanded(
                                             child: TextField(
-                                              controller: _cityCtrl,
+                                              controller: cityCtrl,
                                               decoration: InputDecoration(
-                                                hintText:
-                                                    'e.g. Karachi, Lahore',
+                                                hintText: t.cityHint,
                                                 hintStyle: GoogleFonts.poppins(
                                                   fontSize: 14,
                                                 ),
@@ -320,7 +271,7 @@ class _CrimeCategoriesScreenState extends State<CrimeCategoriesScreen> {
                                                   : Icons.mic_none,
                                               color: const Color(0xFF2209B4),
                                             ),
-                                            onPressed: () => _listen(_cityCtrl),
+                                            onPressed: () => _listen(cityCtrl),
                                           ),
                                         ],
                                       ),
@@ -329,7 +280,7 @@ class _CrimeCategoriesScreenState extends State<CrimeCategoriesScreen> {
                                           onPressed: () =>
                                               Navigator.pop(context, null),
                                           child: Text(
-                                            'Cancel',
+                                            t.cancel,
                                             style: GoogleFonts.poppins(
                                               color: textColor,
                                             ),
@@ -337,7 +288,7 @@ class _CrimeCategoriesScreenState extends State<CrimeCategoriesScreen> {
                                         ),
                                         ElevatedButton(
                                           onPressed: () {
-                                            final txt = _cityCtrl.text.trim();
+                                            final txt = cityCtrl.text.trim();
                                             if (txt.isEmpty) return;
                                             Navigator.pop(context, txt);
                                           },
@@ -347,7 +298,7 @@ class _CrimeCategoriesScreenState extends State<CrimeCategoriesScreen> {
                                             ),
                                           ),
                                           child: Text(
-                                            'Go',
+                                            t.go,
                                             style: GoogleFonts.poppins(),
                                           ),
                                         ),
@@ -358,7 +309,6 @@ class _CrimeCategoriesScreenState extends State<CrimeCategoriesScreen> {
 
                                 if (city != null && city.isNotEmpty) {
                                   final stats = _getStats(city);
-                                  final key = crime['key'] as String;
                                   final localCount = (stats[key] ?? 0) as int;
 
                                   Navigator.push(
@@ -367,7 +317,7 @@ class _CrimeCategoriesScreenState extends State<CrimeCategoriesScreen> {
                                       builder: (_) => CrimeDetailScreen(
                                         cityName: city,
                                         crimeKey: key,
-                                        crimeTitle: crime['title'] as String,
+                                        crimeTitle: t.crimeTitleFor(key),
                                         localCount: localCount,
                                       ),
                                     ),
