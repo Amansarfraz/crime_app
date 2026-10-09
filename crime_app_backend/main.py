@@ -13,6 +13,7 @@ from routers import (
     assistant_router,
     analytics_router,
     digest_router,
+    incident_router,
 )
 
 app = FastAPI(title="Crime Alert Backend")
@@ -37,6 +38,7 @@ app.include_router(user_router.router)
 app.include_router(assistant_router.router)
 app.include_router(analytics_router.router)
 app.include_router(digest_router.router)
+app.include_router(incident_router.router)
 
 # HEATMAP ROUTER
 app.include_router(map_routes.router, prefix="/map")
