@@ -174,6 +174,48 @@ class ApiService {
     }
   }
 
+  // ================== COMMUNITY INCIDENTS ==================
+  Future<void> reportIncident({
+    required String category,
+    required String city,
+    required String description,
+    bool anonymous = true,
+    double? lat,
+    double? lng,
+  }) async {
+    final url = Uri.parse("$baseUrl/incidents/report");
+    final res = await http.post(
+      url,
+      headers: await _authHeader(),
+      body: jsonEncode({
+        "category": category,
+        "city": city.trim(),
+        "description": description.trim(),
+        "anonymous": anonymous,
+        "lat": lat,
+        "lng": lng,
+      }),
+    );
+    if (res.statusCode != 200) {
+      throw Exception("Report error: ${res.body}");
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getIncidentFeed({String? city}) async {
+    var urlStr = "$baseUrl/incidents/feed";
+    if (city != null && city.trim().isNotEmpty) {
+      urlStr += "?city=${Uri.encodeComponent(city.trim())}";
+    }
+    final res = await http.get(Uri.parse(urlStr), headers: await _authHeader());
+    if (res.statusCode == 200) {
+      final data = jsonDecode(res.body);
+      final list = (data["incidents"] as List?) ?? [];
+      return list.map((e) => Map<String, dynamic>.from(e)).toList();
+    } else {
+      throw Exception("Feed error: ${res.body}");
+    }
+  }
+
   // ================== Other endpoints (optional) ==================
   Future<Map<String, dynamic>> getCityGraph(String city) async {
     final url = Uri.parse("$baseUrl/graphs/city/${Uri.encodeComponent(city)}");

@@ -14,6 +14,7 @@ import 'crime_assistant_screen.dart';
 import 'sos_screen.dart';
 import 'daily_digest_screen.dart';
 import 'fake_call_setup_screen.dart';
+import 'incident_feed_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -791,6 +792,31 @@ class _HomeScreenState extends State<HomeScreen>
                         );
                       },
                     ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // ---- COMMUNITY REPORTS QUICK BOX ----
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    buildQuickBox(
+                      t.ur ? "کمیونٹی رپورٹس" : "Community",
+                      Icons.groups,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const IncidentFeedScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 160),
                   ],
                 ),
               ),
