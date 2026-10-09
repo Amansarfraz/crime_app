@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../services/api_service.dart';
 import '../app_text.dart';
 
@@ -19,6 +20,10 @@ class _CrimeAssistantScreenState extends State<CrimeAssistantScreen> {
   bool _sending = false;
   bool _loadingHistory = true;
 
+  // voice
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+
   static const Map<String, String> _greeting = {
     "role": "assistant",
     "content":
@@ -30,7 +35,42 @@ class _CrimeAssistantScreenState extends State<CrimeAssistantScreen> {
   @override
   void initState() {
     super.initState();
+    _speech = stt.SpeechToText();
     _loadHistory();
+  }
+
+  // ----------------- VOICE INPUT -----------------
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) {
+          if (val == "done" || val == "notListening") {
+            if (mounted) setState(() => _isListening = false);
+          }
+        },
+        onError: (val) {
+          if (mounted) setState(() => _isListening = false);
+        },
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) {
+            setState(() {
+              _controller.text = val.recognizedWords;
+            });
+            // final result pe auto-send
+            if (val.finalResult && _controller.text.trim().isNotEmpty) {
+              setState(() => _isListening = false);
+              _send();
+            }
+          },
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
   }
 
   // ----------------- LOAD HISTORY -----------------
@@ -249,6 +289,27 @@ class _CrimeAssistantScreenState extends State<CrimeAssistantScreen> {
                         borderRadius: BorderRadius.circular(24),
                         borderSide: BorderSide.none,
                       ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Mic (voice) button
+                GestureDetector(
+                  onTap: _listen,
+                  child: Container(
+                    height: 46,
+                    width: 46,
+                    decoration: BoxDecoration(
+                      color: _isListening
+                          ? Colors.red
+                          : (isDark
+                                ? Colors.grey.shade700
+                                : Colors.grey.shade400),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _isListening ? Icons.mic : Icons.mic_none,
+                      color: Colors.white,
                     ),
                   ),
                 ),
