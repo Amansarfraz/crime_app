@@ -216,6 +216,21 @@ class ApiService {
     }
   }
 
+  // ================== AI CRIME PREDICTION ==================
+  Future<Map<String, dynamic>> getForecast(String city) async {
+    final url = Uri.parse("$baseUrl/prediction/forecast");
+    final res = await http.post(
+      url,
+      headers: await _authHeader(),
+      body: jsonEncode({"city": city.trim()}),
+    );
+    if (res.statusCode == 200) {
+      return jsonDecode(res.body);
+    } else {
+      throw Exception("Forecast error: ${res.body}");
+    }
+  }
+
   // ================== Other endpoints (optional) ==================
   Future<Map<String, dynamic>> getCityGraph(String city) async {
     final url = Uri.parse("$baseUrl/graphs/city/${Uri.encodeComponent(city)}");

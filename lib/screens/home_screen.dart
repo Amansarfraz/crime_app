@@ -15,6 +15,9 @@ import 'sos_screen.dart';
 import 'daily_digest_screen.dart';
 import 'fake_call_setup_screen.dart';
 import 'incident_feed_screen.dart';
+import 'safe_route_screen.dart';
+import 'crime_prediction_screen.dart';
+import 'evidence_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -816,7 +819,54 @@ class _HomeScreenState extends State<HomeScreen>
                         );
                       },
                     ),
-                    const SizedBox(width: 160),
+                    buildQuickBox(
+                      t.ur ? "محفوظ راستہ" : "Safe Route",
+                      Icons.route,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const SafeRouteScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // ---- AI PREDICTION + EVIDENCE ----
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    buildQuickBox(
+                      t.ur ? "اے آئی پیش گوئی" : "AI Forecast",
+                      Icons.auto_graph,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CrimePredictionScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    buildQuickBox(
+                      t.ur ? "ثبوت ریکارڈر" : "Evidence",
+                      Icons.videocam,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const EvidenceScreen(),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
