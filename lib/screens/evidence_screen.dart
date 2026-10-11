@@ -3,10 +3,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:record/record.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:audioplayers/audioplayers.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/evidence_store.dart';
 
 class EvidenceScreen extends StatefulWidget {
@@ -17,12 +15,7 @@ class EvidenceScreen extends StatefulWidget {
 }
 
 class _EvidenceScreenState extends State<EvidenceScreen> {
-  final AudioRecorder _recorder = AudioRecorder();
-  final AudioPlayer _player = AudioPlayer();
   final ImagePicker _picker = ImagePicker();
-
-  bool _isRecording = false;
-  int _seconds = 0;
   List<Map<String, String>> _recordings = [];
 
   @override
@@ -31,59 +24,9 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
     _load();
   }
 
-  @override
-  void dispose() {
-    _recorder.dispose();
-    _player.dispose();
-    super.dispose();
-  }
-
   Future<void> _load() async {
     final r = await EvidenceStore.load();
     if (mounted) setState(() => _recordings = r);
-  }
-
-  // ---------------- AUDIO ----------------
-  Future<void> _toggleAudio() async {
-    if (_isRecording) {
-      final path = await _recorder.stop();
-      setState(() {
-        _isRecording = false;
-        _seconds = 0;
-      });
-      if (path != null) {
-        final updated = await EvidenceStore.add("audio", path);
-        setState(() => _recordings = updated);
-        _msg("Audio saved");
-      }
-    } else {
-      if (await _recorder.hasPermission()) {
-        String path;
-        if (kIsWeb) {
-          path = "recording_${DateTime.now().millisecondsSinceEpoch}";
-        } else {
-          final dir = await getApplicationDocumentsDirectory();
-          path =
-              "${dir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.m4a";
-        }
-        await _recorder.start(const RecordConfig(), path: path);
-        setState(() {
-          _isRecording = true;
-          _seconds = 0;
-        });
-        _tick();
-      } else {
-        _msg("Microphone permission chahiye");
-      }
-    }
-  }
-
-  void _tick() async {
-    while (_isRecording && mounted) {
-      await Future.delayed(const Duration(seconds: 1));
-      if (!mounted || !_isRecording) break;
-      setState(() => _seconds++);
-    }
   }
 
   // ---------------- VIDEO ----------------
@@ -96,29 +39,39 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
       if (video != null) {
         final updated = await EvidenceStore.add("video", video.path);
         setState(() => _recordings = updated);
-        _msg("Video saved");
+        _msg("Video evidence saved");
       }
     } catch (e) {
       _msg("Video record nahi hua (camera check karein)");
     }
   }
 
-  // ---------------- PLAY AUDIO ----------------
-  Future<void> _playAudio(String path) async {
+  // ---------------- PHOTO ----------------
+  Future<void> _takePhoto() async {
     try {
-      if (kIsWeb) {
-        await _player.play(UrlSource(path));
-      } else {
-        await _player.play(DeviceFileSource(path));
+      final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+      if (photo != null) {
+        final updated = await EvidenceStore.add("photo", photo.path);
+        setState(() => _recordings = updated);
+        _msg("Photo evidence saved");
       }
     } catch (e) {
-      _msg("Play nahi ho paya");
+      _msg("Photo capture nahi hua");
+    }
+  }
+
+  // ---------------- OPEN ----------------
+  Future<void> _open(String path) async {
+    try {
+      final uri = kIsWeb ? Uri.parse(path) : Uri.file(path);
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      _msg("Open nahi ho paya");
     }
   }
 
   Future<void> _delete(int index) async {
     final item = _recordings[index];
-    // file delete (non-web)
     if (!kIsWeb) {
       try {
         final f = File(item["path"] ?? "");
@@ -133,12 +86,6 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
     }
-  }
-
-  String get _timeStr {
-    final m = (_seconds ~/ 60).toString().padLeft(2, '0');
-    final s = (_seconds % 60).toString().padLeft(2, '0');
-    return "$m:$s";
   }
 
   String _formatTime(String iso) {
@@ -165,109 +112,32 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
       ),
       body: Column(
         children: [
-          // Record controls
           Container(
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                if (_isRecording)
-                  Text(
-                    "● REC  $_timeStr",
-                    style: GoogleFonts.poppins(
-                      color: Colors.red,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // Audio button
-                    Column(
-                      children: [
-                        GestureDetector(
-                          onTap: _toggleAudio,
-                          child: Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: _isRecording
-                                  ? Colors.red
-                                  : const Color(0xFF2209B4),
-                              boxShadow: [
-                                BoxShadow(
-                                  color:
-                                      (_isRecording
-                                              ? Colors.red
-                                              : const Color(0xFF2209B4))
-                                          .withOpacity(0.4),
-                                  blurRadius: 16,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              _isRecording ? Icons.stop : Icons.mic,
-                              color: Colors.white,
-                              size: 36,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _isRecording ? "Stop" : "Audio",
-                          style: GoogleFonts.poppins(
-                            color: isDark ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      ],
-                    ),
                     // Video button
-                    Column(
-                      children: [
-                        GestureDetector(
-                          onTap: _isRecording ? null : _recordVideo,
-                          child: Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: _isRecording
-                                  ? Colors.grey
-                                  : const Color(0xFF2488DA),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(
-                                    0xFF2488DA,
-                                  ).withOpacity(0.4),
-                                  blurRadius: 16,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.videocam,
-                              color: Colors.white,
-                              size: 36,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          "Video",
-                          style: GoogleFonts.poppins(
-                            color: isDark ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      ],
+                    _bigButton(
+                      icon: Icons.videocam,
+                      label: "Record Video",
+                      color: const Color(0xFF2209B4),
+                      onTap: _recordVideo,
+                    ),
+                    // Photo button
+                    _bigButton(
+                      icon: Icons.camera_alt,
+                      label: "Take Photo",
+                      color: const Color(0xFF2488DA),
+                      onTap: _takePhoto,
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 Text(
-                  "Record audio or video evidence. Saved on your device.",
+                  "Capture video or photo evidence. Saved securely on your device.",
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     fontSize: 12,
@@ -280,15 +150,25 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
 
           const Divider(),
 
-          // Recordings list
           Expanded(
             child: _recordings.isEmpty
                 ? Center(
-                    child: Text(
-                      "No recordings yet",
-                      style: GoogleFonts.poppins(
-                        color: isDark ? Colors.white54 : Colors.grey,
-                      ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.folder_open,
+                          size: 56,
+                          color: isDark ? Colors.white24 : Colors.grey.shade300,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          "No evidence saved yet",
+                          style: GoogleFonts.poppins(
+                            color: isDark ? Colors.white54 : Colors.grey,
+                          ),
+                        ),
+                      ],
                     ),
                   )
                 : ListView.builder(
@@ -296,7 +176,7 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
                     itemCount: _recordings.length,
                     itemBuilder: (context, i) {
                       final r = _recordings[i];
-                      final isAudio = r["type"] == "audio";
+                      final isVideo = r["type"] == "video";
                       return Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.symmetric(
@@ -315,16 +195,12 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
                         child: Row(
                           children: [
                             CircleAvatar(
-                              backgroundColor:
-                                  (isAudio
-                                          ? const Color(0xFF2209B4)
-                                          : const Color(0xFF2488DA))
-                                      .withOpacity(0.12),
+                              backgroundColor: const Color(
+                                0xFF2209B4,
+                              ).withOpacity(0.12),
                               child: Icon(
-                                isAudio ? Icons.mic : Icons.videocam,
-                                color: isAudio
-                                    ? const Color(0xFF2209B4)
-                                    : const Color(0xFF2488DA),
+                                isVideo ? Icons.videocam : Icons.image,
+                                color: const Color(0xFF2209B4),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -333,9 +209,9 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    isAudio
-                                        ? "Audio recording"
-                                        : "Video recording",
+                                    isVideo
+                                        ? "Video evidence"
+                                        : "Photo evidence",
                                     style: GoogleFonts.poppins(
                                       fontWeight: FontWeight.w600,
                                       color: isDark
@@ -353,14 +229,13 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
                                 ],
                               ),
                             ),
-                            if (isAudio)
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.play_arrow,
-                                  color: Colors.green,
-                                ),
-                                onPressed: () => _playAudio(r["path"] ?? ""),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.open_in_new,
+                                color: Colors.green,
                               ),
+                              onPressed: () => _open(r["path"] ?? ""),
+                            ),
                             IconButton(
                               icon: const Icon(
                                 Icons.delete_outline,
@@ -376,6 +251,46 @@ class _EvidenceScreenState extends State<EvidenceScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _bigButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.4),
+                  blurRadius: 16,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Icon(icon, color: Colors.white, size: 34),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            color: isDark ? Colors.white : Colors.black,
+            fontSize: 13,
+          ),
+        ),
+      ],
     );
   }
 }
