@@ -17,17 +17,19 @@ class SafeRouteScreen extends StatefulWidget {
 class _SafeRouteScreenState extends State<SafeRouteScreen> {
   final ApiService _api = ApiService();
   final MapController _mapController = MapController();
+  final TextEditingController _fromCtrl = TextEditingController();
+  final TextEditingController _toCtrl = TextEditingController();
 
   static const LatLng _defaultCenter = LatLng(30.3753, 69.3451); // Pakistan
 
   LatLng? _start;
   LatLng? _end;
+  String _startName = "";
+  String _endName = "";
   List<LatLng> _routePoints = [];
   bool _loading = false;
 
-  // seeded cities (danger zones)
   List<Map<String, dynamic>> _cities = [];
-  // high-crime cities jo route ke paas hain
   List<Map<String, dynamic>> _warnings = [];
   int _safetyScore = 100;
 
@@ -35,6 +37,13 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
   void initState() {
     super.initState();
     _loadCities();
+  }
+
+  @override
+  void dispose() {
+    _fromCtrl.dispose();
+    _toCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _loadCities() async {
@@ -54,35 +63,55 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
     }
   }
 
-  // tap pe start/end set karo
-  void _onTap(TapPosition tapPos, LatLng point) {
-    setState(() {
-      if (_start == null) {
-        _start = point;
-      } else if (_end == null) {
-        _end = point;
-      } else {
-        // dono set hain -> reset, naya start
-        _start = point;
-        _end = null;
-        _routePoints = [];
-        _warnings = [];
-        _safetyScore = 100;
+  // city name -> coordinates (seeded data se, warna OSM nominatim fallback)
+  Future<Map<String, dynamic>?> _geocodeCity(String name) async {
+    final q = name.trim().toLowerCase();
+    if (q.isEmpty) return null;
+
+    // 1) seeded cities me exact/partial match
+    for (final c in _cities) {
+      final cityName = (c["city"] ?? "").toString().toLowerCase();
+      if (cityName == q && c["lat"] != null && c["lng"] != null) {
+        return {
+          "lat": (c["lat"] as num).toDouble(),
+          "lng": (c["lng"] as num).toDouble(),
+          "name": c["city"],
+        };
       }
-    });
+    }
+    for (final c in _cities) {
+      final cityName = (c["city"] ?? "").toString().toLowerCase();
+      if (cityName.contains(q) && c["lat"] != null && c["lng"] != null) {
+        return {
+          "lat": (c["lat"] as num).toDouble(),
+          "lng": (c["lng"] as num).toDouble(),
+          "name": c["city"],
+        };
+      }
+    }
+
+    // 2) OSM Nominatim fallback (free) - Pakistan ke andar
+    try {
+      final url = Uri.parse(
+        "https://nominatim.openstreetmap.org/search?"
+        "q=${Uri.encodeComponent('$name, Pakistan')}&format=json&limit=1",
+      );
+      final res = await http.get(url, headers: {"User-Agent": "crime-app"});
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body) as List;
+        if (data.isNotEmpty) {
+          return {
+            "lat": double.parse(data[0]["lat"]),
+            "lng": double.parse(data[0]["lon"]),
+            "name": name,
+          };
+        }
+      }
+    } catch (_) {}
+
+    return null;
   }
 
-  void _reset() {
-    setState(() {
-      _start = null;
-      _end = null;
-      _routePoints = [];
-      _warnings = [];
-      _safetyScore = 100;
-    });
-  }
-
-  // haversine distance (km)
   double _distanceKm(LatLng a, LatLng b) {
     const R = 6371.0;
     final dLat = (b.latitude - a.latitude) * pi / 180;
@@ -95,19 +124,43 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
     return R * 2 * atan2(sqrt(h), sqrt(1 - h));
   }
 
-  // OSRM se route nikaalo
   Future<void> _findRoute() async {
-    if (_start == null || _end == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Map par start aur destination tap karein"),
-        ),
-      );
+    final fromName = _fromCtrl.text.trim();
+    final toName = _toCtrl.text.trim();
+
+    if (fromName.isEmpty || toName.isEmpty) {
+      _msg("Dono city ke naam likhein");
       return;
     }
 
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _routePoints = [];
+      _warnings = [];
+      _safetyScore = 100;
+    });
 
+    // 1) geocode dono cities
+    final from = await _geocodeCity(fromName);
+    final to = await _geocodeCity(toName);
+
+    if (from == null) {
+      _msg("Start city '$fromName' nahi mila");
+      setState(() => _loading = false);
+      return;
+    }
+    if (to == null) {
+      _msg("Destination '$toName' nahi mila");
+      setState(() => _loading = false);
+      return;
+    }
+
+    _start = LatLng(from["lat"], from["lng"]);
+    _end = LatLng(to["lat"], to["lng"]);
+    _startName = from["name"].toString();
+    _endName = to["name"].toString();
+
+    // 2) OSRM route
     try {
       final url = Uri.parse(
         "https://router.project-osrm.org/route/v1/driving/"
@@ -115,7 +168,6 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
         "${_end!.longitude},${_end!.latitude}"
         "?overview=full&geometries=geojson",
       );
-
       final res = await http.get(url);
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
@@ -125,7 +177,6 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
               (c) => LatLng((c[1] as num).toDouble(), (c[0] as num).toDouble()),
             )
             .toList();
-
         setState(() => _routePoints = points);
         _analyzeRoute(points);
         _fitBounds();
@@ -134,13 +185,11 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
       }
     } catch (e) {
       _msg("Route error. Internet check karein");
-      debugPrint("Route error: $e");
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  // route ke paas high-crime cities dhoondo + safety score
   void _analyzeRoute(List<LatLng> points) {
     final warnings = <Map<String, dynamic>>[];
     int score = 100;
@@ -155,7 +204,6 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
         (city["lng"] as num).toDouble(),
       );
 
-      // route ke kisi bhi point se 15km ke andar?
       bool near = false;
       for (final p in points) {
         if (_distanceKm(p, cityLoc) <= 15) {
@@ -163,7 +211,6 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
           break;
         }
       }
-
       if (near) {
         warnings.add(city);
         score -= (level == "High") ? 20 : 10;
@@ -197,7 +244,6 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
 
   List<Marker> _buildMarkers() {
     final markers = <Marker>[];
-
     if (_start != null) {
       markers.add(
         Marker(
@@ -218,8 +264,6 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
         ),
       );
     }
-
-    // danger zone markers (warnings)
     for (final w in _warnings) {
       markers.add(
         Marker(
@@ -254,31 +298,62 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: _reset,
-          ),
-        ],
       ),
       body: Column(
         children: [
-          // instruction banner
+          // From / To inputs
           Container(
-            width: double.infinity,
-            color: const Color(0xFF2209B4).withOpacity(0.08),
             padding: const EdgeInsets.all(12),
-            child: Text(
-              _start == null
-                  ? "👆 Map par START point tap karein"
-                  : _end == null
-                  ? "👆 Ab DESTINATION tap karein"
-                  : "✅ 'Find Safe Route' dabayein",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                color: isDark ? Colors.white : Colors.black87,
-              ),
+            color: isDark ? Colors.grey.shade900 : Colors.grey.shade100,
+            child: Column(
+              children: [
+                _cityField(
+                  _fromCtrl,
+                  "From (start city)",
+                  Icons.trip_origin,
+                  Colors.green,
+                  isDark,
+                ),
+                const SizedBox(height: 8),
+                _cityField(
+                  _toCtrl,
+                  "To (destination city)",
+                  Icons.location_on,
+                  Colors.blue,
+                  isDark,
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  height: 46,
+                  child: ElevatedButton.icon(
+                    onPressed: _loading ? null : _findRoute,
+                    icon: _loading
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(Icons.route, color: Colors.white),
+                    label: Text(
+                      "Find Safe Route",
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2209B4),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -287,10 +362,9 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
               children: [
                 FlutterMap(
                   mapController: _mapController,
-                  options: MapOptions(
+                  options: const MapOptions(
                     initialCenter: _defaultCenter,
                     initialZoom: 5.2,
-                    onTap: _onTap,
                   ),
                   children: [
                     TileLayer(
@@ -312,7 +386,6 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
                   ],
                 ),
 
-                // safety score card (route milne ke baad)
                 if (_routePoints.isNotEmpty)
                   Positioned(
                     top: 12,
@@ -347,16 +420,17 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Safety Score: $_safetyScore/100",
+                                  "$_startName → $_endName",
                                   style: GoogleFonts.poppins(
                                     fontWeight: FontWeight.bold,
+                                    fontSize: 13,
                                     color: isDark ? Colors.white : Colors.black,
                                   ),
                                 ),
                                 Text(
                                   _warnings.isEmpty
-                                      ? "No high-crime zones on this route 👍"
-                                      : "⚠️ Passes near ${_warnings.length} high-crime area(s)",
+                                      ? "Safe route 👍 (score $_safetyScore)"
+                                      : "⚠️ ${_warnings.length} high-crime zone(s) on route",
                                   style: GoogleFonts.poppins(
                                     fontSize: 12,
                                     color: _warnings.isEmpty
@@ -375,7 +449,6 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
             ),
           ),
 
-          // warnings list
           if (_warnings.isNotEmpty)
             Container(
               height: 90,
@@ -432,43 +505,31 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
                 }).toList(),
               ),
             ),
-
-          // find route button
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton.icon(
-                onPressed: _loading ? null : _findRoute,
-                icon: _loading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Icon(Icons.route, color: Colors.white),
-                label: Text(
-                  "Find Safe Route",
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2209B4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-          ),
         ],
+      ),
+    );
+  }
+
+  Widget _cityField(
+    TextEditingController ctrl,
+    String hint,
+    IconData icon,
+    Color iconColor,
+    bool isDark,
+  ) {
+    return TextField(
+      controller: ctrl,
+      style: TextStyle(color: isDark ? Colors.white : Colors.black),
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: iconColor),
+        hintText: hint,
+        isDense: true,
+        filled: true,
+        fillColor: isDark ? Colors.grey.shade800 : Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
       ),
     );
   }
