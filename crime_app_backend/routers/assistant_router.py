@@ -63,9 +63,10 @@ async def chat(req: ChatRequest, user=Depends(get_current_user)):
     # Build messages for Groq
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     for m in req.history[-10:]:
-        if m.role in ("user", "assistant"):
-            messages.append({"role": m.role, "content": m.content})
-    messages.append({"role": "user", "content": req.message})
+        # sirf valid roles + non-empty content (warna Groq 400 deta hai)
+        if m.role in ("user", "assistant") and m.content and m.content.strip():
+            messages.append({"role": m.role, "content": m.content.strip()})
+    messages.append({"role": "user", "content": req.message.strip()})
 
     payload = {
         "model": GROQ_MODEL,
@@ -83,6 +84,11 @@ async def chat(req: ChatRequest, user=Depends(get_current_user)):
             res = await client.post(GROQ_URL, json=payload, headers=headers)
 
         if res.status_code != 200:
+            # terminal pe asli Groq error print karo (debug ke liye)
+            print("=" * 60)
+            print(f"GROQ CHAT ERROR  status={res.status_code}")
+            print(res.text)
+            print("=" * 60)
             raise HTTPException(status_code=502, detail=f"Groq error: {res.text}")
 
         data = res.json()
@@ -101,6 +107,9 @@ async def chat(req: ChatRequest, user=Depends(get_current_user)):
     except HTTPException:
         raise
     except Exception as e:
+        print("=" * 60)
+        print(f"ASSISTANT EXCEPTION: {type(e).__name__}: {e}")
+        print("=" * 60)
         raise HTTPException(status_code=500, detail=f"Assistant error: {e}")
 
 

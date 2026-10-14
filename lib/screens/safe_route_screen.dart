@@ -19,6 +19,8 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
   final MapController _mapController = MapController();
   final TextEditingController _fromCtrl = TextEditingController();
   final TextEditingController _toCtrl = TextEditingController();
+  final TextEditingController _cityCtrl =
+      TextEditingController(); // sheher (Karachi)
 
   static const LatLng _defaultCenter = LatLng(30.3753, 69.3451); // Pakistan
 
@@ -28,6 +30,9 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
   String _endName = "";
   List<LatLng> _routePoints = [];
   bool _loading = false;
+
+  double _distanceText = 0; // km
+  double _durationText = 0; // min
 
   List<Map<String, dynamic>> _cities = [];
   List<Map<String, dynamic>> _warnings = [];
@@ -43,6 +48,7 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
   void dispose() {
     _fromCtrl.dispose();
     _toCtrl.dispose();
+    _cityCtrl.dispose();
     super.dispose();
   }
 
@@ -63,12 +69,28 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
     }
   }
 
-  // city name -> coordinates (seeded data se, warna OSM nominatim fallback)
-  Future<Map<String, dynamic>?> _geocodeCity(String name) async {
-    final q = name.trim().toLowerCase();
+  // area/mohalla name -> coordinates.
+  // city alag likhi ho to "area, city, Pakistan" se Nominatim pe dhoondta hai.
+  // warna seeded cities me match, warna "name, Pakistan".
+  Future<Map<String, dynamic>?> _geocodeArea(String name) async {
+    final raw = name.trim();
+    final q = raw.toLowerCase();
     if (q.isEmpty) return null;
 
-    // 1) seeded cities me exact/partial match
+    final city = _cityCtrl.text.trim();
+
+    // Agar user ne city field bhari hai -> seedha Nominatim (area level)
+    // taake chhote area/mohalle accurate milein.
+    if (city.isNotEmpty) {
+      final hit = await _nominatim("$raw, $city, Pakistan");
+      if (hit != null) return hit;
+      // city ke sath na mile to area akela try karo
+      final hit2 = await _nominatim("$raw, Pakistan");
+      if (hit2 != null) return hit2;
+      return null;
+    }
+
+    // city field khaali -> pehle seeded bade sheher me match (tez)
     for (final c in _cities) {
       final cityName = (c["city"] ?? "").toString().toLowerCase();
       if (cityName == q && c["lat"] != null && c["lng"] != null) {
@@ -90,25 +112,34 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
       }
     }
 
-    // 2) OSM Nominatim fallback (free) - Pakistan ke andar
+    // warna Nominatim fallback
+    return await _nominatim("$raw, Pakistan");
+  }
+
+  Future<Map<String, dynamic>?> _nominatim(String query) async {
     try {
       final url = Uri.parse(
         "https://nominatim.openstreetmap.org/search?"
-        "q=${Uri.encodeComponent('$name, Pakistan')}&format=json&limit=1",
+        "q=${Uri.encodeComponent(query)}"
+        "&format=json&limit=1&countrycodes=pk",
       );
-      final res = await http.get(url, headers: {"User-Agent": "crime-app"});
+      final res = await http.get(
+        url,
+        headers: {"User-Agent": "crime-alert-app/1.0"},
+      );
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body) as List;
         if (data.isNotEmpty) {
+          final display = (data[0]["display_name"] ?? "").toString();
+          final shortName = display.split(",").first.trim();
           return {
             "lat": double.parse(data[0]["lat"]),
             "lng": double.parse(data[0]["lon"]),
-            "name": name,
+            "name": shortName.isEmpty ? query : shortName,
           };
         }
       }
     } catch (_) {}
-
     return null;
   }
 
@@ -129,28 +160,32 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
     final toName = _toCtrl.text.trim();
 
     if (fromName.isEmpty || toName.isEmpty) {
-      _msg("Dono city ke naam likhein");
+      _msg("Start aur destination dono likhein");
       return;
     }
+
+    FocusScope.of(context).unfocus();
 
     setState(() {
       _loading = true;
       _routePoints = [];
       _warnings = [];
       _safetyScore = 100;
+      _distanceText = 0;
+      _durationText = 0;
     });
 
-    // 1) geocode dono cities
-    final from = await _geocodeCity(fromName);
-    final to = await _geocodeCity(toName);
+    // 1) geocode dono areas
+    final from = await _geocodeArea(fromName);
+    final to = await _geocodeArea(toName);
 
     if (from == null) {
-      _msg("Start city '$fromName' nahi mila");
+      _msg("'$fromName' nahi mila. City bhi likh ke dekhein.");
       setState(() => _loading = false);
       return;
     }
     if (to == null) {
-      _msg("Destination '$toName' nahi mila");
+      _msg("'$toName' nahi mila. City bhi likh ke dekhein.");
       setState(() => _loading = false);
       return;
     }
@@ -171,13 +206,28 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
       final res = await http.get(url);
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
-        final coords = data["routes"][0]["geometry"]["coordinates"] as List;
+        final routes = data["routes"] as List?;
+        if (routes == null || routes.isEmpty) {
+          _msg("Is area ke beech route nahi mila");
+          setState(() => _loading = false);
+          return;
+        }
+        final r0 = routes[0];
+        final coords = r0["geometry"]["coordinates"] as List;
         final points = coords
             .map(
               (c) => LatLng((c[1] as num).toDouble(), (c[0] as num).toDouble()),
             )
             .toList();
-        setState(() => _routePoints = points);
+
+        final dist = (r0["distance"] as num?)?.toDouble() ?? 0; // meters
+        final dur = (r0["duration"] as num?)?.toDouble() ?? 0; // seconds
+
+        setState(() {
+          _routePoints = points;
+          _distanceText = dist / 1000.0;
+          _durationText = dur / 60.0;
+        });
         _analyzeRoute(points);
         _fitBounds();
       } else {
@@ -228,11 +278,12 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
     if (_routePoints.isEmpty) return;
     final bounds = LatLngBounds.fromPoints(_routePoints);
     _mapController.fitCamera(
-      CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(50)),
+      CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(60)),
     );
   }
 
   void _msg(String m) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
   }
 
@@ -240,6 +291,12 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
     if (_safetyScore >= 70) return Colors.green;
     if (_safetyScore >= 40) return Colors.orange;
     return Colors.red;
+  }
+
+  String _scoreLabel() {
+    if (_safetyScore >= 70) return "Safe";
+    if (_safetyScore >= 40) return "Moderate";
+    return "Risky";
   }
 
   List<Marker> _buildMarkers() {
@@ -301,25 +358,33 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
       ),
       body: Column(
         children: [
-          // From / To inputs
+          // From / To / City inputs
           Container(
             padding: const EdgeInsets.all(12),
             color: isDark ? Colors.grey.shade900 : Colors.grey.shade100,
             child: Column(
               children: [
-                _cityField(
+                _field(
                   _fromCtrl,
-                  "From (start city)",
+                  "From — area/mohalla (e.g. Baldia Town)",
                   Icons.trip_origin,
                   Colors.green,
                   isDark,
                 ),
                 const SizedBox(height: 8),
-                _cityField(
+                _field(
                   _toCtrl,
-                  "To (destination city)",
+                  "To — area/mohalla (e.g. Nazimabad)",
                   Icons.location_on,
                   Colors.blue,
+                  isDark,
+                ),
+                const SizedBox(height: 8),
+                _field(
+                  _cityCtrl,
+                  "City (e.g. Karachi) — accurate match ke liye",
+                  Icons.location_city,
+                  Colors.deepPurple,
                   isDark,
                 ),
                 const SizedBox(height: 10),
@@ -403,15 +468,30 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
                       child: Row(
                         children: [
                           CircleAvatar(
-                            radius: 24,
-                            backgroundColor: _scoreColor().withOpacity(0.15),
-                            child: Text(
-                              "$_safetyScore",
-                              style: GoogleFonts.poppins(
-                                color: _scoreColor(),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
+                            radius: 26,
+                            backgroundColor: _scoreColor().withValues(
+                              alpha: 0.15,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "$_safetyScore",
+                                  style: GoogleFonts.poppins(
+                                    color: _scoreColor(),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    height: 1,
+                                  ),
+                                ),
+                                Text(
+                                  _scoreLabel(),
+                                  style: GoogleFonts.poppins(
+                                    color: _scoreColor(),
+                                    fontSize: 9,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -421,16 +501,29 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
                               children: [
                                 Text(
                                   "$_startName → $_endName",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: GoogleFonts.poppins(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
                                     color: isDark ? Colors.white : Colors.black,
                                   ),
                                 ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  "${_distanceText.toStringAsFixed(1)} km • "
+                                  "${_durationText.toStringAsFixed(0)} min",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    color: isDark
+                                        ? Colors.white70
+                                        : Colors.black54,
+                                  ),
+                                ),
                                 Text(
                                   _warnings.isEmpty
-                                      ? "Safe route 👍 (score $_safetyScore)"
-                                      : "⚠️ ${_warnings.length} high-crime zone(s) on route",
+                                      ? "No high-crime zone on route 👍"
+                                      : "⚠️ ${_warnings.length} high-crime zone(s)",
                                   style: GoogleFonts.poppins(
                                     fontSize: 12,
                                     color: _warnings.isEmpty
@@ -463,7 +556,7 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
                     margin: const EdgeInsets.only(right: 10),
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: _levelColor(level).withOpacity(0.1),
+                      color: _levelColor(level).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: _levelColor(level)),
                     ),
@@ -482,6 +575,8 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
                             Expanded(
                               child: Text(
                                 (w["city"] ?? "").toString(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13,
@@ -510,7 +605,7 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
     );
   }
 
-  Widget _cityField(
+  Widget _field(
     TextEditingController ctrl,
     String hint,
     IconData icon,
@@ -520,9 +615,14 @@ class _SafeRouteScreenState extends State<SafeRouteScreen> {
     return TextField(
       controller: ctrl,
       style: TextStyle(color: isDark ? Colors.white : Colors.black),
+      textInputAction: TextInputAction.next,
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: iconColor),
         hintText: hint,
+        hintStyle: TextStyle(
+          fontSize: 13,
+          color: isDark ? Colors.white54 : Colors.grey,
+        ),
         isDense: true,
         filled: true,
         fillColor: isDark ? Colors.grey.shade800 : Colors.white,
