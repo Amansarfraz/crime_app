@@ -12,8 +12,8 @@ router = APIRouter(prefix="/assistant", tags=["Assistant"])
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
-#GROQ_MODEL = "llama-3.3-70b-versatile"
-GROQ_MODEL = "llama-3.1-8b-instant"
+GROQ_MODEL = "openai/gpt-oss-20b"
+
 SYSTEM_PROMPT = (
     "You are a helpful Crime Safety Assistant for a Pakistan crime-awareness app. "
     "You answer crime-related questions, give safety guidance, and share general "
